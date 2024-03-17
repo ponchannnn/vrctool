@@ -14,6 +14,8 @@
 		D372B61D2BA6AA9400B5AF94 /* vrctoolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D372B61C2BA6AA9400B5AF94 /* vrctoolTests.swift */; };
 		D372B6272BA6AA9400B5AF94 /* vrctoolUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D372B6262BA6AA9400B5AF94 /* vrctoolUITests.swift */; };
 		D372B6292BA6AA9400B5AF94 /* vrctoolUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D372B6282BA6AA9400B5AF94 /* vrctoolUITestsLaunchTests.swift */; };
+		D372B6362BA6AF2500B5AF94 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D372B6352BA6AF2500B5AF94 /* LoginView.swift */; };
+		D372B6382BA6AF7800B5AF94 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D372B6372BA6AF7800B5AF94 /* HomeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +46,8 @@
 		D372B6222BA6AA9400B5AF94 /* vrctoolUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = vrctoolUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D372B6262BA6AA9400B5AF94 /* vrctoolUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = vrctoolUITests.swift; sourceTree = "<group>"; };
 		D372B6282BA6AA9400B5AF94 /* vrctoolUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = vrctoolUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		D372B6352BA6AF2500B5AF94 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		D372B6372BA6AF7800B5AF94 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +102,8 @@
 				D372B60D2BA6AA9300B5AF94 /* ContentView.swift */,
 				D372B60F2BA6AA9400B5AF94 /* Assets.xcassets */,
 				D372B6112BA6AA9400B5AF94 /* Preview Content */,
+				D372B6352BA6AF2500B5AF94 /* LoginView.swift */,
+				D372B6372BA6AF7800B5AF94 /* HomeView.swift */,
 			);
 			path = vrctool;
 			sourceTree = "<group>";
@@ -257,6 +263,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D372B6362BA6AF2500B5AF94 /* LoginView.swift in Sources */,
+				D372B6382BA6AF7800B5AF94 /* HomeView.swift in Sources */,
 				D372B60E2BA6AA9300B5AF94 /* ContentView.swift in Sources */,
 				D372B60C2BA6AA9300B5AF94 /* vrctoolApp.swift in Sources */,
 			);
