@@ -69,6 +69,10 @@ struct LoginView: View {
                             } catch {
                                 print("Failed to parse JSON: \(error)")
                             }
+                            // HomeView.swiftに画面遷移
+                            DispatchQueue.main.async {
+                                self.isLoggedIn = true
+                            }
                         }
                     })
                     
@@ -131,7 +135,7 @@ struct LoginView: View {
                 .padding(.bottom, 20)
                 
                 NavigationLink(
-                    destination: HomeView(),
+                    destination: TwoFactorAuthView(),
                     isActive: $isLoggedIn,
                     label: {
                         EmptyView()
