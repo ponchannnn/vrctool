@@ -34,7 +34,35 @@ struct TwoFactorAuthView: View {
     
     func loginWithTwoFactorAuth() {
         //codeにユーザが入力したデータが入る
-        //apiでgetして認証する
+        //apiでpostして認証する
+        guard let url = URL(string: "https://api.vrchat.cloud/api/1/auth/twofactorauth/totp/verify") else { return }
+                var request = URLRequest(url: url)
+                request.httpMethod = "POST"
+                
+                // Cookieを設定
+                if let cookies = HTTPCookieStorage.shared.cookies {
+                    let headers = HTTPCookie.requestHeaderFields(with: cookies)
+                    request.allHTTPHeaderFields = headers
+                }
+                
+                // ボディを設定
+                let body = ["code": code]
+                request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
+                
+                // リクエストを送信
+                let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+                    if let error = error {
+                        print("Error: \(error)")
+                    } else if let data = data {
+                        do {
+                            let json = try JSONSerialization.jsonObject(with: data, options: [])
+                            print(json)
+                        } catch {
+                            print("Failed to parse JSON: \(error)")
+                        }
+                    }
+                }
+                task.resume()
     }
 }
 
