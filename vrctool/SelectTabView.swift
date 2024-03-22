@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct TabView: View {
+struct SelectTabView: View {
 
     // タブの選択項目を保持する
     @State var selection = 1
@@ -32,3 +32,7 @@ struct TabView: View {
 
     } // body
 } // View
+
+#Preview {
+    SelectTabView()
+}

@@ -12,3 +12,7 @@ struct HomeView: View {
         Text("ホーム画面").font(.largeTitle)
     }
 }
+
+#Preview {
+    HomeView()
+}

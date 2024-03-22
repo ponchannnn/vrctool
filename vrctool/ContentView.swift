@@ -8,8 +8,14 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var isLoggedIn: Bool = false
+    
     var body: some View {
-        LoginView()
+        if isLoggedIn { //ログインしていたら
+            SelectTabView()
+        } else {    //ログインしてなかったら
+            LoginView(isLoggedIn: $isLoggedIn)
+        }
     }
 }
 

@@ -12,7 +12,7 @@ import Foundation
 struct LoginView: View {
     @State private var username: String = ""
     @State private var password: String = ""
-    @State private var isLoggedIn: Bool = false
+    @Binding var isLoggedIn: Bool
 
     var body: some View {
         NavigationView {
@@ -146,3 +146,4 @@ struct LoginView: View {
         }
     }
 }
+
