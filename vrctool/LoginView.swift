@@ -133,14 +133,6 @@ struct LoginView: View {
                         .cornerRadius(5)
                 }
                 .padding(.bottom, 20)
-                
-                NavigationLink(
-                    destination: TwoFactorAuthView(),
-                    isActive: $isLoggedIn,
-                    label: {
-                        EmptyView()
-                    }
-                )
             }
             .padding()
         }

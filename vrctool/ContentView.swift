@@ -8,11 +8,16 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var isLoggedIn: Bool = false
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+    @AppStorage("isTwoFactered") private var isTwoFactered: Bool = false
     
     var body: some View {
         if isLoggedIn { //ログインしていたら
-            SelectTabView()
+            if isTwoFactered {  //２要素認証していたら
+                SelectTabView()
+            } else {    //２要素認証していなかったら
+                TwoFactorAuthView(isTwoFactered: $isTwoFactered)
+            }
         } else {    //ログインしてなかったら
             LoginView(isLoggedIn: $isLoggedIn)
         }
@@ -21,6 +26,8 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        //UserDefaults.standard.removeObject(forKey: "isLoggedIn")
+        //UserDefaults.standard.removeObject(forKey: "isTwoFactered")
+        return ContentView()
     }
 }

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TwoFactorAuthView: View {
     @State private var code: String = ""
+    @Binding var isTwoFactered: Bool
     
     var body: some View {
         VStack {
@@ -56,6 +57,11 @@ struct TwoFactorAuthView: View {
                     } else if let data = data {
                         do {
                             let json = try JSONSerialization.jsonObject(with: data, options: [])
+                            // 2段階認証が成功した場合にisTwoFacteredをtrueにする
+                            // 本来はif文で認証が成功かどうかを試みる必要があるが、、、
+                            DispatchQueue.main.async {
+                                self.isTwoFactered = true
+                            }
                             print(json)
                         } catch {
                             print("Failed to parse JSON: \(error)")
@@ -63,11 +69,5 @@ struct TwoFactorAuthView: View {
                     }
                 }
                 task.resume()
-    }
-}
-
-struct TwoFactorAuthView_Previews: PreviewProvider {
-    static var previews: some View {
-        TwoFactorAuthView()
     }
 }
