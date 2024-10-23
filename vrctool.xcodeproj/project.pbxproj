@@ -17,6 +17,8 @@
 		D372B6362BA6AF2500B5AF94 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D372B6352BA6AF2500B5AF94 /* LoginView.swift */; };
 		D372B6382BA6AF7800B5AF94 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D372B6372BA6AF7800B5AF94 /* HomeView.swift */; };
 		D3914AED2BAB061100EF2924 /* TwoFactorAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3914AEC2BAB061100EF2924 /* TwoFactorAuthView.swift */; };
+		D39DE2D62BAEC33100733A51 /* SelectTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39DE2D52BAEC33100733A51 /* SelectTabView.swift */; };
+		D39DE2D82BAEC34D00733A51 /* EventCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39DE2D72BAEC34D00733A51 /* EventCalendarView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +52,8 @@
 		D372B6352BA6AF2500B5AF94 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		D372B6372BA6AF7800B5AF94 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		D3914AEC2BAB061100EF2924 /* TwoFactorAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwoFactorAuthView.swift; sourceTree = "<group>"; };
+		D39DE2D52BAEC33100733A51 /* SelectTabView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectTabView.swift; sourceTree = "<group>"; };
+		D39DE2D72BAEC34D00733A51 /* EventCalendarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventCalendarView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,8 +109,10 @@
 				D372B60F2BA6AA9400B5AF94 /* Assets.xcassets */,
 				D372B6112BA6AA9400B5AF94 /* Preview Content */,
 				D372B6352BA6AF2500B5AF94 /* LoginView.swift */,
-				D372B6372BA6AF7800B5AF94 /* HomeView.swift */,
 				D3914AEC2BAB061100EF2924 /* TwoFactorAuthView.swift */,
+				D39DE2D52BAEC33100733A51 /* SelectTabView.swift */,
+				D372B6372BA6AF7800B5AF94 /* HomeView.swift */,
+				D39DE2D72BAEC34D00733A51 /* EventCalendarView.swift */,
 			);
 			path = vrctool;
 			sourceTree = "<group>";
@@ -266,8 +272,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D39DE2D62BAEC33100733A51 /* SelectTabView.swift in Sources */,
 				D3914AED2BAB061100EF2924 /* TwoFactorAuthView.swift in Sources */,
 				D372B6362BA6AF2500B5AF94 /* LoginView.swift in Sources */,
+				D39DE2D82BAEC34D00733A51 /* EventCalendarView.swift in Sources */,
 				D372B6382BA6AF7800B5AF94 /* HomeView.swift in Sources */,
 				D372B60E2BA6AA9300B5AF94 /* ContentView.swift in Sources */,
 				D372B60C2BA6AA9300B5AF94 /* vrctoolApp.swift in Sources */,

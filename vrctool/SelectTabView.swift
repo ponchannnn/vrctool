@@ -22,7 +22,10 @@ struct SelectTabView: View {
                 }
                 .tag(1)
 
-            EventCalendarView()   // Viewファイル②
+            CalendarView { dateComponents in
+                // 選択された日付を処理するコード
+                print(dateComponents)
+            }  // Viewファイル②
                 .tabItem {
                     Label("Page2", systemImage: "2.circle")
                 }
