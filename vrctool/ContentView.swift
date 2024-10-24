@@ -27,6 +27,7 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         if let cookies = HTTPCookieStorage.shared.cookies {
+            print("Number of cookies: \(cookies.count)")
             for cookie in cookies {
                 print("Name: \(cookie.name), Value: \(cookie.value)")
             }
