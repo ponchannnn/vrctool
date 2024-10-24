@@ -50,6 +50,15 @@ struct LoginView: View {
                 } message: {
                     Text(self.alertMessage)
                 }
+                Button(action: forceLogin) {
+                    Text("強制ログイン")
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(5)
+                }
+                .padding(.bottom, 20)
             }
             .padding()
         }
@@ -90,5 +99,8 @@ struct LoginView: View {
             }
         }
         task.resume()
+    }
+    private func forceLogin() {
+        self.navigateToTwoFactor = true
     }
 }
