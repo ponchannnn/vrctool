@@ -9,17 +9,17 @@ import SwiftUI
 
 struct ContentView: View {
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
-    @AppStorage("isTwoFactered") private var isTwoFactered: Bool = false
+    @AppStorage("isTwoFactored") private var isTwoFactored: Bool = false
     
     var body: some View {
         if isLoggedIn { //ログインしていたら
-            if isTwoFactered {  //２要素認証していたら
+            if isTwoFactored {  //２要素認証していたら
                 SelectTabView()
             } else {    //２要素認証していなかったら
-                TwoFactorAuthView(isLoggedIn: $isLoggedIn, isTwoFactered: $isTwoFactered)
+                TwoFactorAuthView()
             }
         } else {    //ログインしてなかったら
-            LoginView(isLoggedIn: $isLoggedIn)
+            LoginView(isLoggedIn: $isLoggedIn, isTwoFactored: $isTwoFactored)
         }
     }
 }
@@ -31,13 +31,13 @@ struct ContentView_Previews: PreviewProvider {
                 print("Name: \(cookie.name), Value: \(cookie.value)")
             }
         }
-//        if let cookies = HTTPCookieStorage.shared.cookies {
-//            for cookie in cookies {
-//                HTTPCookieStorage.shared.deleteCookie(cookie)
-//            }
-//        }
-//        UserDefaults.standard.removeObject(forKey: "isLoggedIn")
-//        UserDefaults.standard.removeObject(forKey: "isTwoFactered")
+        if let cookies = HTTPCookieStorage.shared.cookies {
+            for cookie in cookies {
+                HTTPCookieStorage.shared.deleteCookie(cookie)
+            }
+        }
+        UserDefaults.standard.removeObject(forKey: "isLoggedIn")
+        UserDefaults.standard.removeObject(forKey: "isTwoFactored")
         return ContentView()
     }
 }
