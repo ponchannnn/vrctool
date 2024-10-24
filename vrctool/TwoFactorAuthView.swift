@@ -26,7 +26,7 @@ struct TwoFactorAuthView: View {
             }
             .padding()
 
-            NavigationLink(destination: HomeView(), isActive: $isTwoFactored) {
+            NavigationLink(destination: SelectTabView(), isActive: $isTwoFactored) {
                 EmptyView()
             }
         }

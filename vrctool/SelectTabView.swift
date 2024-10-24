@@ -32,7 +32,7 @@ struct SelectTabView: View {
                 .tag(2)
 
         } // TabView ここまで
-
+        .navigationBarBackButtonHidden(true) // 戻るボタンを非表示にする
     } // body
 } // View
 

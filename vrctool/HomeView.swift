@@ -203,7 +203,6 @@ struct HomeView: View {
                             fetchFriendsMock()
                         }
         }
-        .navigationBarBackButtonHidden(true) // 戻るボタンを非表示にする
     }
     
     func fetchFriendsMock() {
