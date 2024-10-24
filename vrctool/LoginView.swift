@@ -1,11 +1,3 @@
-//
-//  LoginView.swift
-//  vrctool
-//
-//  Created by 池田瑞基 on 2024/03/17.
-//
-
-
 import SwiftUI
 import Foundation
 
@@ -13,11 +5,15 @@ struct LoginView: View {
     @State private var username: String = ""
     @State private var password: String = ""
     @Binding var isLoggedIn: Bool
+    @State private var showAlert = false
+    @State private var alertMessage = ""
 
     var body: some View {
         NavigationView {
             VStack {
-                Text("ログイン").font(.largeTitle).padding(.bottom, 20)
+                Text("ログイン")
+                    .font(.largeTitle)
+                    .padding(.bottom, 20)
                 
                 TextField("ユーザー名", text: $username)
                     .padding()
@@ -32,98 +28,41 @@ struct LoginView: View {
                     .padding(.bottom, 20)
                 
                 Button(action: {
-                     // ここにログインの処理を実装します
-                    
+                    // ログイン処理
                     let loginString = "\(self.username):\(self.password)"
                     guard let loginData = loginString.data(using: .utf8) else { return }
                     let base64LoginString = loginData.base64EncodedString()
                     
-                    let headers = [
-                      "User-Agent": "chrome/1.0",
-                      "Authorization": "Basic \(base64LoginString)"
-                    ]
-
-                    let postData = NSData(data: "".data(using: String.Encoding.utf8)!)
-
-                    let request = NSMutableURLRequest(url: NSURL(string: "https://api.vrchat.cloud/api/1/auth/user")! as URL,
-                                                            cachePolicy: .useProtocolCachePolicy,
-                                                        timeoutInterval: 10.0)
+                    var request = URLRequest(url: URL(string: "https://vrchat.com/api/1/auth/user")!)
                     request.httpMethod = "GET"
-                    request.allHTTPHeaderFields = headers
-                    request.httpBody = postData as Data
-
-                    // リクエスト内容をprint
-                    print("Request: \(request)")
-                    print("HTTP Method: \(String(describing: request.httpMethod))")
-                    print("Headers: \(String(describing: request.allHTTPHeaderFields))")
-
-                    let session = URLSession.shared
-                    let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
-                        if (error != nil) {
-                            print(error)
-                        } else if let data = data {
-                            do {
-                                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                                    print(json)
-                                }
-                            } catch {
-                                print("Failed to parse JSON: \(error)")
-                            }
-                            // HomeView.swiftに画面遷移
+                    request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
+                    request.setValue("chrome/1.0", forHTTPHeaderField: "User-Agent")
+                    
+                    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+                        guard let data = data, error == nil else {
                             DispatchQueue.main.async {
-                                self.isLoggedIn = true
+                                self.alertMessage = "ログインに失敗しました。もう一度お試しください。"
+                                self.showAlert = true
+                            }
+                            return
+                        }
+                        if let httpStatus = response as? HTTPURLResponse {
+                            print(httpStatus)
+                            if httpStatus.statusCode == 200 {
+                                DispatchQueue.main.async {
+                                    self.isLoggedIn = true
+                                }
+                            } else {
+                                DispatchQueue.main.async {
+                                    self.alertMessage = "ログインに失敗しました。"
+                                    self.showAlert = true
+                                    self.username = ""  // ユーザー名のリセット
+                                    self.password = ""  // パスワードのリセット
+                                }
                             }
                         }
-                    })
-                    
-                    dataTask.resume()
-                    
-                    
-                    
-                    
-                    
-                    
-//                     var request = URLRequest(url: URL(string: "https://api.vrchat.cloud/api/1/auth/user")!)
-//                     request.httpMethod = "GET"
-//                     request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
-//                     // User-Agentを追加
-//                     request.setValue("chrome/1.0", forHTTPHeaderField: "User-Agent")
-//                     let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
-//                         guard let data = data, error == nil else {
-//                             print(String(describing: error))
-//                             return
-//                         }
-//                         if let httpStatus = response as? HTTPURLResponse {
-//                             print(httpStatus.statusCode)
-//                             if httpStatus.statusCode == 200 {
-//                                 // レスポンスコードが200の場合、ログイン成功とみなす
-//                                 DispatchQueue.main.async {
-//                                     self.isLoggedIn = true
-//                                 }
-//                                 let str = String(decoding: data, as: UTF8.self)
-//                                 print("ステータスコードが200です")
-//                                 print(str)
-//                             } else {
-//                                 // レスポンスコードが200以外の場合、ログイン失敗とみなす
-//                                 print("statusCode should be 200, but is \(httpStatus.statusCode)")
-//                                 print("response = \(response)")
-//                             }
-//                         }
-//                     }
-//                    do {
-//                        let requestInfo = [
-//                            "url": request.url?.absoluteString ?? "",
-//                            "httpMethod": request.httpMethod ?? "",
-//                            "headers": request.allHTTPHeaderFields ?? [:],
-//                            "body": String(data: request.httpBody ?? Data(), encoding: .utf8) ?? ""
-//                        ]
-//                        let jsonData = try JSONSerialization.data(withJSONObject: requestInfo, options: .prettyPrinted)
-//                        let jsonString = String(data: jsonData, encoding: .utf8)
-//                        print(jsonString ?? "")
-//                    } catch {
-//                        print("Failed to convert request to JSON")
-//                    }
-//                     task.resume()
+                    }
+                    task.resume()
                 }) {
                     Text("ログイン")
                         .foregroundColor(.white)
@@ -133,9 +72,13 @@ struct LoginView: View {
                         .cornerRadius(5)
                 }
                 .padding(.bottom, 20)
+                .alert("エラー", isPresented: $showAlert) {
+                    Button("OK", role: .cancel) {}
+                } message: {
+                    Text(self.alertMessage)
+                }
             }
             .padding()
         }
     }
 }
-

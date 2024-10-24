@@ -16,7 +16,7 @@ struct ContentView: View {
             if isTwoFactered {  //２要素認証していたら
                 SelectTabView()
             } else {    //２要素認証していなかったら
-                TwoFactorAuthView(isTwoFactered: $isTwoFactered)
+                TwoFactorAuthView(isLoggedIn: $isLoggedIn, isTwoFactered: $isTwoFactered)
             }
         } else {    //ログインしてなかったら
             LoginView(isLoggedIn: $isLoggedIn)
@@ -26,8 +26,18 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        //UserDefaults.standard.removeObject(forKey: "isLoggedIn")
-        //UserDefaults.standard.removeObject(forKey: "isTwoFactered")
+        if let cookies = HTTPCookieStorage.shared.cookies {
+            for cookie in cookies {
+                print("Name: \(cookie.name), Value: \(cookie.value)")
+            }
+        }
+//        if let cookies = HTTPCookieStorage.shared.cookies {
+//            for cookie in cookies {
+//                HTTPCookieStorage.shared.deleteCookie(cookie)
+//            }
+//        }
+//        UserDefaults.standard.removeObject(forKey: "isLoggedIn")
+//        UserDefaults.standard.removeObject(forKey: "isTwoFactered")
         return ContentView()
     }
 }
