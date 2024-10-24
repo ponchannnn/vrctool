@@ -29,9 +29,10 @@ struct TwoFactorAuthView: View {
     }
 
     func authenticate() {
-        guard let url = URL(string: "https://example.com/api/twofactor") else { return }
+        guard let url = URL(string: "https://vrchat.com/api/1/auth/twofactorauth/emailotp/verify") else { return }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         let body = ["code": code] as [String : String]
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
