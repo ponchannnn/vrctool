@@ -31,6 +31,86 @@ struct Friend: Identifiable, Decodable {
     let userIcon: String
 }
 
+struct Instance: Codable {
+    let active: Bool
+    let canRequestInvite: Bool
+    let capacity: Int
+    let clientNumber: String
+    let closedAt: String?
+    let displayName: String?
+    let full: Bool
+    let gameServerVersion: Int
+    let hardClose: String?
+    let hasCapacityForYou: Bool
+    let id: String
+    let instanceId: String
+    let instancePersistenceEnabled: Bool?
+    let location: String
+    let n_users: Int
+    let name: String
+    let ownerId: String?
+    let permanent: Bool
+    let photonRegion: String
+    let platforms: Platforms
+    let playerPersistenceEnabled: Bool
+    let queueEnabled: Bool
+    let queueSize: Int
+    let recommendedCapacity: Int
+    let region: String
+    let secureName: String
+    let shortName: String
+    let strict: Bool
+    let tags: [String]
+    let type: String
+    let userCount: Int
+    let world: World
+    let worldId: String
+}
+
+struct Platforms: Codable {
+    let android: Int
+    let ios: Int
+    let standalonewindows: Int
+}
+
+struct World: Codable {
+    let authorId: String
+    let authorName: String
+    let capacity: Int
+    let created_at: String
+    let description: String
+    let favorites: Int
+    let featured: Bool
+    let heat: Int
+    let id: String
+    let imageUrl: String
+    let labsPublicationDate: String
+    let name: String
+    let organization: String
+    let popularity: Int
+    let previewYoutubeId: String?
+    let publicationDate: String
+    let recommendedCapacity: Int
+    let releaseStatus: String
+    let tags: [String]
+    let thumbnailImageUrl: String
+    let udonProducts: [String]
+    let unityPackages: [UnityPackage]
+    let updated_at: String
+    let version: Int
+    let visits: Int
+}
+
+struct UnityPackage: Codable {
+    let assetUrl: String
+    let assetVersion: Int
+    let created_at: String
+    let id: String
+    let platform: String
+    let unitySortNumber: Int
+    let unityVersion: String
+}
+
 let mockFriends: [Friend] = [
     Friend(
         id: "usr_27e495f4-b619-41ca-b451-2a6399196182",
@@ -182,6 +262,102 @@ let mockFriends: [Friend] = [
         userIcon: ""
     )
 ]
+
+let mockInstance = Instance(
+    active: true,
+    canRequestInvite: false,
+    capacity: 32,
+    clientNumber: "unknown",
+    closedAt: nil,
+    displayName: nil,
+    full: false,
+    gameServerVersion: 1343,
+    hardClose: nil,
+    hasCapacityForYou: true,
+    id: "wrld_4c2f8911-b082-4f58-8383-c6d64231b5a6:77874~region(jp)",
+    instanceId: "77874~region(jp)",
+    instancePersistenceEnabled: nil,
+    location: "wrld_4c2f8911-b082-4f58-8383-c6d64231b5a6:77874~region(jp)",
+    n_users: 1,
+    name: "77874",
+    ownerId: nil,
+    permanent: true,
+    photonRegion: "jp",
+    platforms: Platforms(android: 0, ios: 0, standalonewindows: 1),
+    playerPersistenceEnabled: true,
+    queueEnabled: false,
+    queueSize: 0,
+    recommendedCapacity: 16,
+    region: "jp",
+    secureName: "gjsxsh7y",
+    shortName: "ftcufzj3",
+    strict: false,
+    tags: [
+        "author_tag_Quest",
+        "author_tag_Shooter",
+        "author_tag_Game",
+        "author_tag_PVP",
+        "author_tag_PC",
+        "language_jpn"
+    ],
+    type: "public",
+    userCount: 1,
+    world: World(
+        authorId: "usr_d55653d6-089b-4107-8d0d-c9209d4f05a6",
+        authorName: "Neko Koko",
+        capacity: 32,
+        created_at: "2024-05-14T16:43:28.597Z",
+        description: "Welcome to the Sci Fi City Arenaǃ New System Update Coming Soonǃ",
+        favorites: 252,
+        featured: false,
+        heat: 4,
+        id: "wrld_4c2f8911-b082-4f58-8383-c6d64231b5a6",
+        imageUrl: "https://api.vrchat.cloud/api/1/file/file_3dd713ab-1731-4438-ab95-ee064b3a2d8c/4/file",
+        labsPublicationDate: "2024-05-16T15:49:02.324Z",
+        name: "Sci Fi City Arena （PvP）",
+        organization: "vrchat",
+        popularity: 5,
+        previewYoutubeId: nil,
+        publicationDate: "2024-06-11T19:34:19.674Z",
+        recommendedCapacity: 16,
+        releaseStatus: "public",
+        tags: [
+            "author_tag_Quest",
+            "author_tag_Shooter",
+            "author_tag_Game",
+            "author_tag_PVP",
+            "author_tag_PC",
+            "system_approved",
+            "system_updated_recently"
+        ],
+        thumbnailImageUrl: "https://api.vrchat.cloud/api/1/image/file_3dd713ab-1731-4438-ab95-ee064b3a2d8c/4/256",
+        udonProducts: [],
+        unityPackages: [
+            UnityPackage(
+                assetUrl: "https://api.vrchat.cloud/api/1/file/file_43e7ad1d-d125-4b2f-adfd-9a0c4ca5af27/13/file",
+                assetVersion: 1,
+                created_at: "2024-10-31T17:26:07.190Z",
+                id: "unp_089415e2-8984-4843-a888-94bce52117b5",
+                platform: "android",
+                unitySortNumber: 20190431000,
+                unityVersion: "2019.4.31f1"
+            ),
+            UnityPackage(
+                assetUrl: "https://api.vrchat.cloud/api/1/file/file_3707ab99-cde6-45e1-a73d-72eac22c06bd/19/file",
+                assetVersion: 1,
+                created_at: "2024-10-31T17:13:54.047Z",
+                id: "unp_b460e699-0b9f-41f2-ae1b-0a0445b1c88e",
+                platform: "standalonewindows",
+                unitySortNumber: 20190431000,
+                unityVersion: "2019.4.31f1"
+            )
+        ],
+        updated_at: "2024-11-04T05:40:09.387Z",
+        version: 200,
+        visits: 2258
+    ),
+    worldId: "wrld_4c2f8911-b082-4f58-8383-c6d64231b5a6"
+)
 
 struct HomeView: View {
     @State private var friends: [Friend] = []
