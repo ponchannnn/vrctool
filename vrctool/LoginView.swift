@@ -9,6 +9,8 @@ struct LoginView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var navigateToTwoFactor = false
+    @State private var editting1 = false
+    
 
     private let loginFailedMessage = "ログインに失敗しました。もう一度お試しください。"
     private let loginErrorMessage = "ログインに失敗しました。"
@@ -20,11 +22,26 @@ struct LoginView: View {
                     .font(.largeTitle)
                     .padding(.bottom, 20)
                 
-                TextField("ユーザー名", text: $username)
+                TextField("ユーザー名", text: $username,
+                          onEditingChanged: { begin in
+                        /// 入力開始処理
+                        if begin {
+                            self.editting1 = true    // 編集フラグをオン
+
+                            /// 入力終了処理
+                        } else {
+                            self.editting1 = false   // 編集フラグをオフ
+                        }
+                    }
+                )
                     .padding()
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(5)
                     .padding(.bottom, 20)
+                    .keyboardType(.default)
+                    .autocorrectionDisabled(true)
+                    .autocapitalization(.none)
+                    .shadow(color: editting1 ? .blue : .clear, radius: 3)
                 
                 SecureField("パスワード", text: $password)
                     .padding()
