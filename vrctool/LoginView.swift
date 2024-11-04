@@ -65,6 +65,15 @@ struct LoginView: View {
     }
 
     private func login() {
+        // cookieあれば削除
+        if let cookies = HTTPCookieStorage.shared.cookies {
+            for cookie in cookies {
+                if (cookie.name == "auth" || cookie.name == "twoFactorAuth") {
+                    HTTPCookieStorage.shared.deleteCookie(cookie);
+                }
+            }
+        }
+        
         let loginString = "\(self.username):\(self.password)"
         guard let loginData = loginString.data(using: .utf8) else { return }
         let base64LoginString = loginData.base64EncodedString()
@@ -86,6 +95,7 @@ struct LoginView: View {
                 print(httpStatus)
                 if httpStatus.statusCode == 200 {
                     DispatchQueue.main.async {
+                        self.isLoggedIn = true;
                         self.navigateToTwoFactor = true
                     }
                 } else {

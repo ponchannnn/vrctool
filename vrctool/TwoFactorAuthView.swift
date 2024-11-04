@@ -1,37 +1,39 @@
 import SwiftUI
 
 struct TwoFactorAuthView: View {
+    @State private var isTwoFactored: Bool = false
     @State private var code: String = ""
     @State private var alertMessage: String = ""
     @State private var showAlert: Bool = false
-    @State private var isTwoFactored: Bool = false
 
     var body: some View {
-        VStack {
-            TextField("コードを入力してください", text: $code)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+        NavigationView {
+            VStack {
+                TextField("コードを入力してください", text: $code)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+
+                Button(action: {
+                    self.authenticate()
+                }) {
+                    Text("認証")
+                }
+                .padding()
+                
+                Button(action: {
+                    self.forceAuthenticate()
+                }) {
+                    Text("強制認証")
+                }
                 .padding()
 
-            Button(action: {
-                self.authenticate()
-            }) {
-                Text("認証")
+                NavigationLink(destination: SelectTabView(), isActive: $isTwoFactored) {
+                    EmptyView()
+                }
             }
-            .padding()
-            
-            Button(action: {
-                self.forceAuthenticate()
-            }) {
-                Text("強制認証")
+            .alert(isPresented: $showAlert) {
+                Alert(title: Text("エラー"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
             }
-            .padding()
-
-            NavigationLink(destination: SelectTabView(), isActive: $isTwoFactored) {
-                EmptyView()
-            }
-        }
-        .alert(isPresented: $showAlert) {
-            Alert(title: Text("エラー"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
         }
     }
 
@@ -56,24 +58,37 @@ struct TwoFactorAuthView: View {
             if let httpStatus = response as? HTTPURLResponse {
                 DispatchQueue.main.async {
                     switch httpStatus.statusCode {
-                        case 200:
-                            // 認証成功
-                            self.isTwoFactored = true
-                        case 401:
-                            // 認証失敗
-                            self.alertMessage = "認証に失敗しました。コードが正しいか確認してください。"
-                            self.showAlert = true
-                        default:
-                            // その他のエラーハンドリング
-                            self.alertMessage = "予期しないエラーが発生しました。ステータスコード: \(httpStatus.statusCode)"
-                            self.showAlert = true
+                    case 200:
+                        // 認証成功
+                        self.deleteAuthCookie()
+                        UserDefaults.standard.set(true, forKey: "isTwoFactored")
+                        self.isTwoFactored = true
+                    case 401:
+                        // 認証失敗
+                        self.alertMessage = "認証に失敗しました。コードが正しいか確認してください。"
+                        self.showAlert = true
+                    default:
+                        // その他のエラーハンドリング
+                        self.alertMessage = "予期しないエラーが発生しました。ステータスコード: \(httpStatus.statusCode)"
+                        self.showAlert = true
                     }
                 }
             }
         }
         task.resume()
     }
+
     func forceAuthenticate() {
         self.isTwoFactored = true
+    }
+
+    func deleteAuthCookie() {
+        if let cookies = HTTPCookieStorage.shared.cookies {
+            for cookie in cookies {
+                if cookie.name == "auth" {
+                    HTTPCookieStorage.shared.deleteCookie(cookie)
+                }
+            }
+        }
     }
 }
