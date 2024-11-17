@@ -188,51 +188,88 @@ let mockInstance2 = Instance2(
 struct InstanceView: View {
     @State private var instance: Instance2 = mockInstance2
     @State private var authCookie: String = "your_auth_cookie_here" // ここに実際の認証クッキーを設定
+    @State private var showAlert = false
+    @State private var isErrorAlert = true
+    @State private var alertMessage = ""
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 10) {
-                // World2.name
-                Text(instance.world.name)
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                
-                // 画像
-                if let imageUrl = URL(string: instance.world.imageUrl) {
-                    AsyncImage(url: imageUrl) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxWidth: .infinity)
-                    } placeholder: {
-                        ProgressView()
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
+                    // 画像
+                    if let imageUrl = URL(string: instance.world.imageUrl) {
+                        AsyncImage(url: imageUrl) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(maxWidth: .infinity)
+                        } placeholder: {
+                            ProgressView()
+                        }
                     }
-                }
-                
-                // By authorName
-                Text("By \(instance.world.authorName)")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                
-                // Instance詳細の表
-                if instance.active {
+                    
+                    // By authorName
+                    Text("By \(instance.world.authorName)")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    
+                    // Instance詳細の表
+                    if instance.active {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Instance Details")
+                                .font(.headline)
+
+                                Group {
+                                Text("Instance ID: \(instance.name)")
+                                if let ownerId = instance.ownerId {
+                                    Text("Owner ID: \(ownerId)")
+                                }
+                                Text("Region: \(instance.region)")
+                                Text("Type: \(instance.type)")
+                                Text("User Count: \(instance.n_users)")
+                            }
+                            
+                            HStack {
+                                Text("Android: \(instance.platforms.android)")
+                                Text("iOS: \(instance.platforms.ios)")
+                                Text("Windows: \(instance.platforms.standalonewindows)")
+                            }
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(UIColor.systemGray6))
+                        .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.blue, lineWidth: 2)
+                        )
+                    } else {
+                        Text("Instance is not active")
+                    }
+                    
+                    // World詳細の表
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Instance Details")
+                        Text("World Details")
                             .font(.headline)
 
                             Group {
-                            Text("Instance ID: \(instance.name)")
-                            if let ownerId = instance.ownerId {
-                                Text("Owner ID: \(ownerId)")
-                            }
-                            Text("Region: \(instance.region)")
-                            Text("Type: \(instance.type)")
-                            Text("User Count: \(instance.n_users)")
+                            Text("Description: \(instance.world.description)")
+                            Text("Visits: \(instance.world.visits)")
+                            Text("Favorites: \(instance.world.favorites)")
+                            Text("Capacity: \(instance.world.capacity)")
+                            Text("Updated At: \(instance.world.updated_at)")
+                            Text("Created At: \(instance.world.created_at)")
+                            Text("Release Status: \(instance.world.releaseStatus)")
+                            Text("Version: \(instance.world.version)")
                         }
                         
-                        HStack {
-                            Text("Android: \(instance.platforms.android)")
-                            Text("iOS: \(instance.platforms.ios)")
-                            Text("Windows: \(instance.platforms.standalonewindows)")
+                        Text("Tags")
+                            .font(.subheadline)
+                        
+                        ForEach(instance.world.tags, id: \.self) { tag in
+                            Text(tag)
+                                .padding(5)
+                                .background(Color.blue.opacity(0.2))
+                                .cornerRadius(5)
                         }
                     }
                     .padding()
@@ -243,50 +280,46 @@ struct InstanceView: View {
                         RoundedRectangle(cornerRadius: 10)
                             .stroke(Color.blue, lineWidth: 2)
                     )
-                } else {
-                    Text("Instance is not active")
-                }
-                
-                // World詳細の表
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("World Details")
-                        .font(.headline)
-
-                        Group {
-                        Text("Description: \(instance.world.description)")
-                        Text("Visits: \(instance.world.visits)")
-                        Text("Favorites: \(instance.world.favorites)")
-                        Text("Capacity: \(instance.world.capacity)")
-                        Text("Updated At: \(instance.world.updated_at)")
-                        Text("Created At: \(instance.world.created_at)")
-                        Text("Release Status: \(instance.world.releaseStatus)")
-                        Text("Version: \(instance.world.version)")
-                    }
-                    
-                    Text("Tags")
-                        .font(.subheadline)
-                    
-                    ForEach(instance.world.tags, id: \.self) { tag in
-                        Text(tag)
-                            .padding(5)
-                            .background(Color.blue.opacity(0.2))
-                            .cornerRadius(5)
-                    }
                 }
                 .padding()
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(UIColor.systemGray6))
-                .cornerRadius(10)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color.blue, lineWidth: 2)
-                )
+                .onAppear {
+                    fetchInstanceMock()
+                }
             }
-            .padding()
-            .onAppear {
-                fetchInstanceMock()
+            .navigationTitle(instance.world.name)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing){  // 右上のボタン
+                    Menu {
+                        Button(action: {
+                            NetworkManager.inviteMyselfToInstance(instanceId: instance.id) { result in
+                                switch result {
+                                    case .success:
+                                        alertMessage = "招待成功"
+                                        isErrorAlert = false
+                                        showAlert = true
+                                    case .failure(let error):
+                                        alertMessage = error.localizedDescription
+                                        isErrorAlert = true
+                                        showAlert = true
+                                }
+                            }
+                        }) {
+                            Label("自分を招待", systemImage: "envelope.open.fill")
+                        }
+                        Button(action: {}) {
+                            Label("フレンドを招待", systemImage: "envelope.badge.person.crop.fill")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                    }
+                }
+            }
+            .alert(isPresented: $showAlert) {
+                Alert(title: isErrorAlert ? Text("Error"): Text("Success"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
             }
         }
+        
     }
     
     func fetchInstanceMock() {
