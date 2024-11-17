@@ -162,7 +162,7 @@ let mockFriends: [Friend] = [
         last_login: "2024-10-22T08:15:41.773Z",
         last_mobile: nil,
         last_platform: "standalonewindows",
-        location: "offline",
+        location: "wrld_4c2f8911-b082-4f58-8383-c6d64231b5a6:77874~region(jp)",
         platform: "",
         profilePicOverride: "https://api.vrchat.cloud/api/1/file/file_6539ee0d-5e3d-4cdd-acb4-6644883ea8bd/1",
         profilePicOverrideThumbnail: "https://api.vrchat.cloud/api/1/image/file_6539ee0d-5e3d-4cdd-acb4-6644883ea8bd/1/256",
@@ -219,7 +219,7 @@ let mockFriends: [Friend] = [
         last_login: "2023-08-11T10:43:18.043Z",
         last_mobile: nil,
         last_platform: "standalonewindows",
-        location: "offline",
+        location: "wrld_4c2f8911-b082-4f58-8383-c6d64231b5a6:77874~region(jp)",
         platform: "",
         profilePicOverride: "",
         profilePicOverrideThumbnail: "",
@@ -248,7 +248,7 @@ let mockFriends: [Friend] = [
         last_login: "2023-01-15T06:59:32.487Z",
         last_mobile: nil,
         last_platform: "standalonewindows",
-        location: "offline",
+        location: "wrld_4c2f8911-b082-4f58-8383-c6d64231b5a6:77874~region(jp)",
         platform: "",
         profilePicOverride: "",
         profilePicOverrideThumbnail: "",
@@ -364,16 +364,20 @@ struct HomeView: View {
     @State private var instances: [Instance] = []
     @State private var authCookie: String = "your_auth_cookie_here" // ここに実際の認証クッキーを設定
     var body: some View {
-        VStack {
-            ScrollView {
-                ForEach(instances, id: \.id) { instance in
-                    VStack(alignment: .leading) {
-                        InstanceCard(instance: instance)
-                            .padding()
-                        
-                        ForEach(friends.filter { $0.location == instance.id }, id: \.id) { friend in
-                            FriendCard(friend: friend)
-                                .padding(.leading, 20)
+            VStack {
+                ScrollView {
+                    ForEach(instances, id: \.id) { instance in
+                        VStack(alignment: .leading) {
+                            InstanceCard(instance: instance)
+                                .padding()
+                            
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                                ForEach(friends.filter { $0.location == instance.id }, id: \.id) { friend in
+                                    FriendCard(friend: friend)
+                                        .frame(height: 140)
+                                        .padding(.horizontal, 5)
+                                }
+                            }
                         }
                     }
                 }
@@ -383,7 +387,6 @@ struct HomeView: View {
                 fetchFriendsMock()
             }
         }
-    }
     
     func fetchFriendsMock() {
             // モックデータを使用
@@ -434,6 +437,16 @@ struct InstanceCard: View {
     
     var body: some View {
         VStack(alignment: .leading) {
+            if let imageUrl = URL(string: instance.world.imageUrl) {
+                AsyncImage(url: imageUrl) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(maxWidth: .infinity)
+                } placeholder: {
+                    ProgressView()
+                }
+            }
             Text("Instance ID: \(instance.id)")
                 .font(.headline)
             Text("World ID: \(instance.worldId)")
@@ -450,12 +463,23 @@ struct FriendCard: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Friend ID: \(friend.id)")
+            if let imageUrl = URL(string: friend.imageUrl) {
+                AsyncImage(url: imageUrl) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 100, height: 100) // 画像のサイズを固定
+                } placeholder: {
+                    ProgressView()
+                        .frame(width: 100, height: 100) // プレースホルダーのサイズも固定
+                }
+            }
+            Text(friend.displayName)
                 .font(.headline)
-            Text("Location: \(friend.location)")
-                .font(.subheadline)
+                .lineLimit(1) // 1行に制限
+                .truncationMode(.tail) // 省略記号を末尾に表示
         }
-        .padding()
+        .padding(6) // 内側の余白を小さくする
         .background(Color.blue.opacity(0.2))
         .cornerRadius(10)
     }
