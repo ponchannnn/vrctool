@@ -126,7 +126,7 @@ let mockFriends: [Friend] = [
         last_login: "2024-10-23T08:27:18.682Z",
         last_mobile: nil,
         last_platform: "standalonewindows",
-        location: "offline",
+        location: "wrld_4c2f8911-b082-4f58-8383-c6d64231b5a6:77874~region(jp)",
         platform: "",
         profilePicOverride: "",
         profilePicOverrideThumbnail: "",
@@ -196,7 +196,7 @@ let mockFriends: [Friend] = [
         last_login: "2024-03-20T13:24:18.718Z",
         last_mobile: nil,
         last_platform: "standalonewindows",
-        location: "offline",
+        location: "wrld_4c2f8911-b082-4f58-8383-c6d64231b5a6:77874~region(jp)",
         platform: "",
         profilePicOverride: "",
         profilePicOverrideThumbnail: "",
@@ -361,23 +361,27 @@ let mockInstance = Instance(
 
 struct HomeView: View {
     @State private var friends: [Friend] = []
+    @State private var instances: [Instance] = []
     @State private var authCookie: String = "your_auth_cookie_here" // ここに実際の認証クッキーを設定
-
     var body: some View {
-        NavigationView {
-            List(friends) { friend in
-                VStack(alignment: .leading) {
-                    Text(friend.displayName)
-                        .font(.headline)
-                    Text(friend.bio)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+        VStack {
+            ScrollView {
+                ForEach(instances, id: \.id) { instance in
+                    VStack(alignment: .leading) {
+                        InstanceCard(instance: instance)
+                            .padding()
+                        
+                        ForEach(friends.filter { $0.location == instance.id }, id: \.id) { friend in
+                            FriendCard(friend: friend)
+                                .padding(.leading, 20)
+                        }
+                    }
                 }
             }
-            .navigationTitle("フレンド一覧")
             .onAppear {
-                            fetchFriendsMock()
-                        }
+                fetchInstanceMock()
+                fetchFriendsMock()
+            }
         }
     }
     
@@ -385,6 +389,10 @@ struct HomeView: View {
             // モックデータを使用
             self.friends = mockFriends
         }
+    
+    func fetchInstanceMock() {
+        self.instances = [mockInstance, mockInstance]
+    }
 
     func fetchFriends() {
         guard let url = URL(string: "https://vrchat.com/api/1/auth/user/friends?offline=true") else {
@@ -418,6 +426,38 @@ struct HomeView: View {
         }
 
         task.resume()
+    }
+}
+
+struct InstanceCard: View {
+    var instance: Instance
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("Instance ID: \(instance.id)")
+                .font(.headline)
+            Text("World ID: \(instance.worldId)")
+                .font(.subheadline)
+        }
+        .padding()
+        .background(Color.gray.opacity(0.2))
+        .cornerRadius(10)
+    }
+}
+
+struct FriendCard: View {
+    var friend: Friend
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("Friend ID: \(friend.id)")
+                .font(.headline)
+            Text("Location: \(friend.location)")
+                .font(.subheadline)
+        }
+        .padding()
+        .background(Color.blue.opacity(0.2))
+        .cornerRadius(10)
     }
 }
 
