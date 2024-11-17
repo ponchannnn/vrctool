@@ -5,13 +5,27 @@ struct TwoFactorAuthView: View {
     @State private var code: String = ""
     @State private var alertMessage: String = ""
     @State private var showAlert: Bool = false
+    @State private var editting1 = false
 
     var body: some View {
         NavigationView {
             VStack {
-                TextField("コードを入力してください", text: $code)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
+                TextField("コードを入力してください", text: $code,
+                      onEditingChanged: { begin in
+                          /// 入力開始処理
+                          if begin {
+                              self.editting1 = true    // 編集フラグをオン
+                                  
+                              /// 入力終了処理
+                          } else {
+                              self.editting1 = false   // 編集フラグをオフ
+                          }
+                      }
+                  )
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .keyboardType(.decimalPad)
+                .shadow(color: editting1 ? .blue : .clear, radius: 3)
 
                 Button(action: {
                     self.authenticate()
