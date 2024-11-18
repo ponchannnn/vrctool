@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		D302C2D42CEA2080004371D6 /* InstanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D302C2D32CEA2080004371D6 /* InstanceView.swift */; };
 		D302C2D82CEA30EA004371D6 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D302C2D72CEA30EA004371D6 /* NetworkManager.swift */; };
+		D3676F882CEA53AD00306019 /* UserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3676F872CEA53AD00306019 /* UserView.swift */; };
 		D372B60C2BA6AA9300B5AF94 /* vrctoolApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D372B60B2BA6AA9300B5AF94 /* vrctoolApp.swift */; };
 		D372B60E2BA6AA9300B5AF94 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D372B60D2BA6AA9300B5AF94 /* ContentView.swift */; };
 		D372B6102BA6AA9400B5AF94 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D372B60F2BA6AA9400B5AF94 /* Assets.xcassets */; };
@@ -43,6 +44,7 @@
 /* Begin PBXFileReference section */
 		D302C2D32CEA2080004371D6 /* InstanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstanceView.swift; sourceTree = "<group>"; };
 		D302C2D72CEA30EA004371D6 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
+		D3676F872CEA53AD00306019 /* UserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserView.swift; sourceTree = "<group>"; };
 		D372B6082BA6AA9300B5AF94 /* vrctool.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = vrctool.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D372B60B2BA6AA9300B5AF94 /* vrctoolApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = vrctoolApp.swift; sourceTree = "<group>"; };
 		D372B60D2BA6AA9300B5AF94 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -119,6 +121,7 @@
 				D39DE2D72BAEC34D00733A51 /* EventCalendarView.swift */,
 				D302C2D32CEA2080004371D6 /* InstanceView.swift */,
 				D302C2D72CEA30EA004371D6 /* NetworkManager.swift */,
+				D3676F872CEA53AD00306019 /* UserView.swift */,
 			);
 			path = vrctool;
 			sourceTree = "<group>";
@@ -285,6 +288,7 @@
 				D39DE2D82BAEC34D00733A51 /* EventCalendarView.swift in Sources */,
 				D372B6382BA6AF7800B5AF94 /* HomeView.swift in Sources */,
 				D302C2D42CEA2080004371D6 /* InstanceView.swift in Sources */,
+				D3676F882CEA53AD00306019 /* UserView.swift in Sources */,
 				D372B60E2BA6AA9300B5AF94 /* ContentView.swift in Sources */,
 				D372B60C2BA6AA9300B5AF94 /* vrctoolApp.swift in Sources */,
 			);
