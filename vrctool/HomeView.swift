@@ -438,21 +438,23 @@ struct InstanceCard: View {
     var instance: Instance
     
     var body: some View {
-        VStack(alignment: .leading) {
-            if let imageUrl = URL(string: instance.world.imageUrl) {
-                AsyncImage(url: imageUrl) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(maxWidth: .infinity)
-                } placeholder: {
-                    ProgressView()
+        NavigationLink (destination: InstanceView(instanceId: instance.id)) {
+            VStack(alignment: .leading) {
+                if let imageUrl = URL(string: instance.world.imageUrl) {
+                    AsyncImage(url: imageUrl) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: .infinity)
+                    } placeholder: {
+                        ProgressView()
+                    }
                 }
+                Text("Instance ID: \(instance.id)")
+                    .font(.headline)
+                Text("World ID: \(instance.worldId)")
+                    .font(.subheadline)
             }
-            Text("Instance ID: \(instance.id)")
-                .font(.headline)
-            Text("World ID: \(instance.worldId)")
-                .font(.subheadline)
         }
         .padding()
         .background(Color.gray.opacity(0.2))
