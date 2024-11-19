@@ -74,7 +74,6 @@ struct TwoFactorAuthView: View {
                     switch httpStatus.statusCode {
                     case 200:
                         // 認証成功
-                        self.deleteAuthCookie()
                         UserDefaults.standard.set(true, forKey: "isTwoFactored")
                         self.isTwoFactored = true
                     case 401:
@@ -94,15 +93,5 @@ struct TwoFactorAuthView: View {
 
     func forceAuthenticate() {
         self.isTwoFactored = true
-    }
-
-    func deleteAuthCookie() {
-        if let cookies = HTTPCookieStorage.shared.cookies {
-            for cookie in cookies {
-                if cookie.name == "auth" {
-                    HTTPCookieStorage.shared.deleteCookie(cookie)
-                }
-            }
-        }
     }
 }

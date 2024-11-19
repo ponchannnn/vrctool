@@ -18,7 +18,7 @@ struct User: Codable {
     let currentAvatarImageUrl: String
     let currentAvatarTags: [String]
     let currentAvatarThumbnailImageUrl: String
-    let dateJoined: String
+    let date_joined: String
     let developerType: String
     let displayName: String
     let friendKey: String
@@ -26,9 +26,9 @@ struct User: Codable {
     let id: String
     let instanceId: String
     let isFriend: Bool
-    let lastActivity: String
-    let lastLogin: String
-    let lastPlatform: String
+    let last_activity: String
+    let last_login: String
+    let last_platform: String
     let location: String
     let note: String
     let platform: String
@@ -70,7 +70,7 @@ let mockUser = User(
     currentAvatarImageUrl: "https://api.vrchat.cloud/api/1/file/file_0e8c4e32-7444-44ea-ade4-313c010d4bae/1/file",
     currentAvatarTags: [],
     currentAvatarThumbnailImageUrl: "https://api.vrchat.cloud/api/1/image/file_0e8c4e32-7444-44ea-ade4-313c010d4bae/1/256",
-    dateJoined: "2020-08-31",
+    date_joined: "2020-08-31",
     developerType: "none",
     displayName: "Spis（スピス）",
     friendKey: "",
@@ -78,9 +78,9 @@ let mockUser = User(
     id: "usr_bd77ec85-06f6-4f88-9978-4c16dc13a483",
     instanceId: "offline",
     isFriend: false,
-    lastActivity: "",
-    lastLogin: "",
-    lastPlatform: "standalonewindows",
+    last_activity: "",
+    last_login: "",
+    last_platform: "standalonewindows",
     location: "offline",
     note: "",
     platform: "offline",
@@ -107,31 +107,44 @@ let mockUser = User(
 )
 
 struct UserView: View {
+    var userId: String
+
     @State private var user: User = mockUser
+    @State private var selectedBadge: Badge? = nil
+    @State private var showModal = false
+    @State private var isLoading = true
+    @State private var errorMessage: String?
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    // プロフィール画像
-                    if let imageUrl = URL(string: user.profilePicOverride) {
-                        AsyncImage(url: imageUrl) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(maxWidth: .infinity)
-                        } placeholder: {
-                            ProgressView()
-                        }
+            if isLoading {
+                ProgressView()
+                    .onAppear {
+                        fetchUser(userId: userId)
                     }
+            } else if let errorMessage = errorMessage {
+                Text("Error: \(errorMessage)")
+            } else {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 10) {
+                        // プロフィール画像
+                        if let imageUrl = URL(string: user.profilePicOverride) {
+                            AsyncImage(url: imageUrl) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(maxWidth: .infinity)
+                            } placeholder: {
+                                ProgressView()
+                            }
+                        }
                     
                     // Bio
-                    
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Bio")
-                        .font(.headline)
+                            .font(.headline)
                         Text(user.bio)
-                        .font(.body)
+                            .font(.body)
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -162,24 +175,21 @@ struct UserView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Badges")
                             .font(.headline)
-
-                        ForEach(user.badges) { badge in
-                            HStack {
+                        
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 50))], spacing: 10) {
+                            ForEach(user.badges) { badge in
                                 if let badgeUrl = URL(string: badge.badgeImageUrl) {
                                     AsyncImage(url: badgeUrl) { image in
                                         image
                                             .resizable()
                                             .frame(width: 50, height: 50)
+                                            .onTapGesture {
+                                                selectedBadge = badge
+                                                showModal = true
+                                            }
                                     } placeholder: {
                                         ProgressView()
                                     }
-                                }
-                                VStack(alignment: .leading) {
-                                    Text(badge.badgeName)
-                                        .font(.headline)
-                                    Text(badge.badgeDescription)
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
                                 }
                             }
                         }
@@ -195,8 +205,8 @@ struct UserView: View {
                     
                     // その他の情報
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Joined: \(user.dateJoined)")
-                        Text("Last Platform: \(user.lastPlatform)")
+                        Text("Joined: \(user.date_joined)")
+                        Text("Last Platform: \(user.last_platform)")
                         Text("Status: \(user.status)")
                     }
                     .padding()
@@ -211,11 +221,72 @@ struct UserView: View {
                 .padding()
             }
             .navigationTitle(user.displayName)
-            .navigationBarTitleDisplayMode(.inline)
+                .navigationBarTitleDisplayMode(.inline)
+                .sheet(isPresented: $showModal) {
+                    if let badge = selectedBadge {
+                        BadgeDetailView(badge: badge)
+                    }
+                }
+            }
+        }
+    }
+
+    private func fetchUser(userId: String) {
+        NetworkManager.fetchUser(userId: userId) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let user):
+                    self.user = user
+                    self.isLoading = false
+                case .failure(let error):
+                    self.errorMessage = error.localizedDescription
+                    self.isLoading = false
+                }
+            }
         }
     }
 }
 
+
+struct BadgeDetailView: View {
+    let badge: Badge
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                if let badgeUrl = URL(string: badge.badgeImageUrl) {
+                    AsyncImage(url: badgeUrl) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 50, height: 50)
+                    } placeholder: {
+                        ProgressView()
+                    }
+                }
+                
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(badge.badgeName)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                    
+                    Text(badge.badgeDescription)
+                        .font(.body)
+                }
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(UIColor.systemGray6))
+        .cornerRadius(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.blue, lineWidth: 2)
+        )
+        .padding()
+    }
+}
+
 #Preview {
-    UserView()
+    UserView(userId: "usr_bd77ec85-06f6-4f88-9978-4c16dc13a483")
 }

@@ -364,27 +364,29 @@ struct HomeView: View {
     @State private var instances: [Instance] = []
     @State private var authCookie: String = "your_auth_cookie_here" // ここに実際の認証クッキーを設定
     var body: some View {
-            VStack {
-                ScrollView {
-                    ForEach(instances, id: \.id) { instance in
-                        VStack(alignment: .leading) {
-                            InstanceCard(instance: instance)
-                                .padding()
-                            
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                                ForEach(friends.filter { $0.location == instance.id }, id: \.id) { friend in
-                                    FriendCard(friend: friend)
-                                        .frame(height: 140)
-                                        .padding(.horizontal, 5)
+            NavigationStack {
+                VStack {
+                    ScrollView {
+                        ForEach(instances, id: \.id) { instance in
+                            VStack(alignment: .leading) {
+                                InstanceCard(instance: instance)
+                                    .padding()
+                                
+                                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                                    ForEach(friends.filter { $0.location == instance.id }, id: \.id) { friend in
+                                        FriendCard(friend: friend)
+                                            .frame(height: 140)
+                                            .padding(.horizontal, 5)
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-            .onAppear {
-                fetchInstanceMock()
-                fetchFriendsMock()
+                .onAppear {
+                    fetchInstanceMock()
+                    fetchFriendsMock()
+                }
             }
         }
     
@@ -462,26 +464,28 @@ struct FriendCard: View {
     var friend: Friend
     
     var body: some View {
-        VStack(alignment: .leading) {
-            if let imageUrl = URL(string: friend.imageUrl) {
-                AsyncImage(url: imageUrl) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 100, height: 100) // 画像のサイズを固定
-                } placeholder: {
-                    ProgressView()
-                        .frame(width: 100, height: 100) // プレースホルダーのサイズも固定
+        NavigationLink(destination: UserView(userId: friend.id)) {
+            VStack(alignment: .leading) {
+                if let imageUrl = URL(string: friend.imageUrl) {
+                    AsyncImage(url: imageUrl) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 100, height: 100) // 画像のサイズを固定
+                    } placeholder: {
+                        ProgressView()
+                            .frame(width: 100, height: 100) // プレースホルダーのサイズも固定
+                    }
                 }
+                Text(friend.displayName)
+                    .font(.headline)
+                    .lineLimit(1) // 1行に制限
+                    .truncationMode(.tail) // 省略記号を末尾に表示
             }
-            Text(friend.displayName)
-                .font(.headline)
-                .lineLimit(1) // 1行に制限
-                .truncationMode(.tail) // 省略記号を末尾に表示
+            .padding(6) // 内側の余白を小さくする
+            .background(Color.blue.opacity(0.2))
+            .cornerRadius(10)
         }
-        .padding(6) // 内側の余白を小さくする
-        .background(Color.blue.opacity(0.2))
-        .cornerRadius(10)
     }
 }
 
