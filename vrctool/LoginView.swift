@@ -4,8 +4,8 @@ import Foundation
 struct LoginView: View {
     @State private var username: String = ""
     @State private var password: String = ""
-    @Binding var isLoggedIn: Bool
-    @Binding var isTwoFactored: Bool
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+    @AppStorage("isTwoFactored") private var isTwoFactored: Bool = false
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var navigateToTwoFactor = false
@@ -16,7 +16,7 @@ struct LoginView: View {
     private let loginErrorMessage = "ログインに失敗しました。"
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 Text("ログイン")
                     .font(.largeTitle)
@@ -78,6 +78,11 @@ struct LoginView: View {
                 .padding(.bottom, 20)
             }
             .padding()
+            .onAppear {
+                if isLoggedIn {
+                    navigateToTwoFactor = true
+                }
+            }
         }
     }
 
@@ -95,7 +100,7 @@ struct LoginView: View {
         guard let loginData = loginString.data(using: .utf8) else { return }
         let base64LoginString = loginData.base64EncodedString()
         
-        var request = URLRequest(url: URL(string: "https://vrchat.com/api/1/auth/user")!)
+        var request = URLRequest(url: URL(string: "https://api.vrchat.cloud/api/1/auth/user")!)
         request.httpMethod = "GET"
         request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
         request.setValue("chrome/1.0", forHTTPHeaderField: "User-Agent")
@@ -128,6 +133,7 @@ struct LoginView: View {
         task.resume()
     }
     private func forceLogin() {
+        self.isLoggedIn = true
         self.navigateToTwoFactor = true
     }
 }

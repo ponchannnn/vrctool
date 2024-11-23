@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  vrctool
-//
-//  Created by 池田瑞基 on 2024/03/17.
-//
-
 import SwiftUI
 
 struct ContentView: View {
@@ -12,14 +5,10 @@ struct ContentView: View {
     @AppStorage("isTwoFactored") private var isTwoFactored: Bool = false
     
     var body: some View {
-        if isLoggedIn { //ログインしていたら
-            if isTwoFactored {  //２要素認証していたら
-                SelectTabView()
-            } else {    //２要素認証していなかったら
-                TwoFactorAuthView()
-            }
+        if isLoggedIn && isTwoFactored { //ログインしていたら
+            SelectTabView()
         } else {    //ログインしてなかったら
-            LoginView(isLoggedIn: $isLoggedIn, isTwoFactored: $isTwoFactored)
+            LoginView()
         }
     }
 }
@@ -32,13 +21,13 @@ struct ContentView_Previews: PreviewProvider {
                 print("Name: \(cookie.name), Value: \(cookie.value)")
             }
         }
-        if let cookies = HTTPCookieStorage.shared.cookies {
-            for cookie in cookies {
-                HTTPCookieStorage.shared.deleteCookie(cookie)
-            }
-        }
-        UserDefaults.standard.removeObject(forKey: "isLoggedIn")
-        UserDefaults.standard.removeObject(forKey: "isTwoFactored")
+//        if let cookies = HTTPCookieStorage.shared.cookies {
+//            for cookie in cookies {
+//                HTTPCookieStorage.shared.deleteCookie(cookie)
+//            }
+//        }
+//        UserDefaults.standard.removeObject(forKey: "isLoggedIn")
+//        UserDefaults.standard.removeObject(forKey: "isTwoFactored")
         return ContentView()
     }
 }

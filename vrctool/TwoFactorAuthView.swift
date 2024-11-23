@@ -8,7 +8,7 @@ struct TwoFactorAuthView: View {
     @State private var editting1 = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 TextField("コードを入力してください", text: $code,
                       onEditingChanged: { begin in
@@ -35,7 +35,8 @@ struct TwoFactorAuthView: View {
                 .padding()
                 
                 Button(action: {
-                    self.forceAuthenticate()
+                    UserDefaults.standard.set(true, forKey: "isTwoFactored")
+                    self.isTwoFactored = true
                 }) {
                     Text("強制認証")
                 }
@@ -89,9 +90,5 @@ struct TwoFactorAuthView: View {
             }
         }
         task.resume()
-    }
-
-    func forceAuthenticate() {
-        self.isTwoFactored = true
     }
 }

@@ -1,10 +1,3 @@
-//
-//  TabView.swift
-//  vrctool
-//
-//  Created by 池田瑞基 on 2024/03/22.
-//
-
 import SwiftUI
 
 struct SelectTabView: View {
@@ -18,7 +11,7 @@ struct SelectTabView: View {
 
             HomeView()   // Viewファイル①
                 .tabItem {
-                    Label("Page1", systemImage: "1.circle")
+                    Label("ホーム", systemImage: "house")
                 }
                 .tag(1)
 
@@ -27,7 +20,7 @@ struct SelectTabView: View {
                 print(dateComponents)
             }  // Viewファイル②
                 .tabItem {
-                    Label("Page2", systemImage: "2.circle")
+                    Label("カレンダー", systemImage: "calendar")
                 }
                 .tag(2)
 

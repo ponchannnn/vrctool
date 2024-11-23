@@ -363,74 +363,97 @@ struct HomeView: View {
     @State private var friends: [Friend] = []
     @State private var instances: [Instance] = []
     @State private var authCookie: String = "your_auth_cookie_here" // ここに実際の認証クッキーを設定
+
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = true
+    @AppStorage("isTwoFactored") private var isTwoFactored: Bool = true
+    @State private var showLoginView = false
+    @State private var showLogoutAlert = false
+
     var body: some View {
-            NavigationStack {
+        NavigationStack {
+            ScrollView {
                 VStack {
-                    ScrollView {
-                        ForEach(instances, id: \.id) { instance in
-                            VStack(alignment: .leading) {
-                                InstanceCard(instance: instance)
-                                    .padding()
-                                
-                                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                                    ForEach(friends.filter { $0.location == instance.id }, id: \.id) { friend in
-                                        FriendCard(friend: friend)
-                                            .frame(height: 140)
-                                            .padding(.horizontal, 5)
-                                    }
+                    ForEach(instances, id: \.id) { instance in
+                        VStack(alignment: .leading) {
+                            InstanceCard(instance: instance)
+                                .padding()
+
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                                ForEach(friends.filter { $0.location == instance.id }, id: \.id) { friend in
+                                    FriendCard(friend: friend)
+                                        .frame(height: 140)
+                                        .padding(.horizontal, 5)
                                 }
                             }
                         }
                     }
                 }
-                .onAppear {
-                    fetchInstanceMock()
-                    fetchFriendsMock()
+            }
+            .onAppear {
+                fetchInstanceMock()
+                fetchFriendsMock()
+            }
+            .navigationTitle("Home")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar() {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button(action: {
+                            logout()
+                        }) {
+                            Label("設定", systemImage: "gearshape")
+                        }
+                        Button(action: {
+                            showLogoutAlert = true
+                        }) {
+                            Label("ログアウト", systemImage: "arrow.right.square")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                    }
                 }
             }
+            .alert(isPresented: $showLogoutAlert) {
+                Alert(
+                    title: Text("ログアウト"),
+                    message: Text("本当にログアウトしますか？"),
+                    primaryButton: .destructive(Text("ログアウト")) {
+                        logout()
+                    },
+                    secondaryButton: .cancel()
+                )
+            }
+            .fullScreenCover(isPresented: $showLoginView) {
+                LoginView()
+            }
         }
-    
-    func fetchFriendsMock() {
-            // モックデータを使用
-            self.friends = mockFriends
-        }
-    
-    func fetchInstanceMock() {
-        self.instances = [mockInstance, mockInstance]
     }
 
-    func fetchFriends() {
-        guard let url = URL(string: "https://vrchat.com/api/1/auth/user/friends?offline=true") else {
-            print("Invalid URL")
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("auth=\(authCookie)", forHTTPHeaderField: "Cookie")
-
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("Error: \(error)")
-                return
-            }
-
-            guard let data = data else {
-                print("No data")
-                return
-            }
-
-            do {
-                let friends = try JSONDecoder().decode([Friend].self, from: data)
-                DispatchQueue.main.async {
-                    self.friends = friends
+    func logout() {
+        // ログアウト処理
+        isLoggedIn = false
+        isTwoFactored = false
+        
+        // クッキーを削除
+        if let cookies = HTTPCookieStorage.shared.cookies {
+            for cookie in cookies {
+                if (cookie.name == "auth" || cookie.name == "twoFactorAuth") {
+                    HTTPCookieStorage.shared.deleteCookie(cookie);
                 }
-            } catch {
-                print("Failed to decode JSON: \(error)")
             }
         }
 
-        task.resume()
+        // ログイン画面に遷移
+        showLoginView = true
+    }
+
+    func fetchFriendsMock() {
+        // モックデータを使用
+        self.friends = mockFriends
+    }
+
+    func fetchInstanceMock() {
+        self.instances = [mockInstance, mockInstance]
     }
 }
 
@@ -450,10 +473,12 @@ struct InstanceCard: View {
                         ProgressView()
                     }
                 }
-                Text("Instance ID: \(instance.id)")
+                Text("\(instance.world.name)")
                     .font(.headline)
-                Text("World ID: \(instance.worldId)")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                Text("Users In-World: \(instance.n_users)")
                     .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
         }
         .padding()
@@ -472,7 +497,7 @@ struct FriendCard: View {
                     AsyncImage(url: imageUrl) { image in
                         image
                             .resizable()
-                            .aspectRatio(contentMode: .fit)
+                            .aspectRatio(contentMode: .fill)
                             .frame(width: 100, height: 100) // 画像のサイズを固定
                     } placeholder: {
                         ProgressView()

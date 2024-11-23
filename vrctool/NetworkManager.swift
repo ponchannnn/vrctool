@@ -19,12 +19,24 @@ struct NetworkManager {
                 return
             }
             
-            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("No response")
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No response"])))
+                return
+            }
+            
+            if httpResponse.statusCode == 401 {
+                print("Unauthorized")
+                completion(.failure(NSError(domain: "", code: 401, userInfo: [NSLocalizedDescriptionKey: "Unauthorized"])))
+                return
+            }
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
                 print("Server error")
-                let errorCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+                let errorCode = httpResponse.statusCode
                 let errorMessage = HTTPURLResponse.localizedString(forStatusCode: errorCode)
                 print("Server error with code: \(errorCode), message: \(errorMessage)")
-                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage])))
+                completion(.failure(NSError(domain: "", code: errorCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])))
                 return
             }
             
@@ -51,12 +63,24 @@ struct NetworkManager {
                 return
             }
             
-            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("No response")
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No response"])))
+                return
+            }
+            
+            if httpResponse.statusCode == 401 {
+                print("Unauthorized")
+                completion(.failure(NSError(domain: "", code: 401, userInfo: [NSLocalizedDescriptionKey: "Unauthorized"])))
+                return
+            }
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
                 print("Server error")
-                let errorCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+                let errorCode = httpResponse.statusCode
                 let errorMessage = HTTPURLResponse.localizedString(forStatusCode: errorCode)
                 print("Server error with code: \(errorCode), message: \(errorMessage)")
-                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage])))
+                completion(.failure(NSError(domain: "", code: errorCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])))
                 return
             }
             
@@ -92,12 +116,24 @@ struct NetworkManager {
                 return
             }
             
-            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("No response")
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No response"])))
+                return
+            }
+            
+            if httpResponse.statusCode == 401 {
+                print("Unauthorized")
+                completion(.failure(NSError(domain: "", code: 401, userInfo: [NSLocalizedDescriptionKey: "Unauthorized"])))
+                return
+            }
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
                 print("Server error")
-                let errorCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+                let errorCode = httpResponse.statusCode
                 let errorMessage = HTTPURLResponse.localizedString(forStatusCode: errorCode)
                 print("Server error with code: \(errorCode), message: \(errorMessage)")
-                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage])))
+                completion(.failure(NSError(domain: "", code: errorCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])))
                 return
             }
             
