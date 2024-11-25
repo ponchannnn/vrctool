@@ -14,6 +14,12 @@ struct SelectTabView: View {
                     Label("ホーム", systemImage: "house")
                 }
                 .tag(1)
+            
+            ProfileView()   // Viewファイル①
+                .tabItem {
+                    Label("プロフィール", systemImage: "person.crop.circle")
+                }
+                .tag(2)
 
             CalendarView { dateComponents in
                 // 選択された日付を処理するコード
@@ -22,7 +28,7 @@ struct SelectTabView: View {
                 .tabItem {
                     Label("カレンダー", systemImage: "calendar")
                 }
-                .tag(2)
+                .tag(3)
 
         } // TabView ここまで
         .navigationBarBackButtonHidden(true) // 戻るボタンを非表示にする

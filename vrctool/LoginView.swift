@@ -10,6 +10,7 @@ struct LoginView: View {
     @State private var alertMessage = ""
     @State private var navigateToTwoFactor = false
     @State private var editting1 = false
+    @State private var isLoading = false
     
 
     private let loginFailedMessage = "ログインに失敗しました。もう一度お試しください。"
@@ -53,20 +54,21 @@ struct LoginView: View {
                     EmptyView()
                 }
                 
-                Button(action: login) {
-                    Text("ログイン")
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .cornerRadius(5)
+                if isLoading {
+                    ProgressView()
+                        .padding(.bottom, 20)
+                } else {
+                    Button(action: login) {
+                        Text("ログイン")
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .cornerRadius(5)
+                    }
+                    .padding(.bottom, 20)
                 }
-                .padding(.bottom, 20)
-                .alert("エラー", isPresented: $showAlert) {
-                    Button("OK", role: .cancel) {}
-                } message: {
-                    Text(self.alertMessage)
-                }
+                
                 Button(action: forceLogin) {
                     Text("強制ログイン")
                         .foregroundColor(.white)
@@ -83,57 +85,44 @@ struct LoginView: View {
                     navigateToTwoFactor = true
                 }
             }
+            .alert("エラー", isPresented: $showAlert) {
+                    Button("OK", role: .cancel) {}
+                } message: {
+                    Text(self.alertMessage)
+                }
         }
     }
 
     private func login() {
-        // cookieあれば削除
-        if let cookies = HTTPCookieStorage.shared.cookies {
-            for cookie in cookies {
-                if (cookie.name == "auth" || cookie.name == "twoFactorAuth") {
-                    HTTPCookieStorage.shared.deleteCookie(cookie);
-                }
-            }
+        self.isLoading = true
+        if self.navigateToTwoFactor {   //遷移先から戻ったときの処理
+            self.navigateToTwoFactor = false
         }
-        
-        let loginString = "\(self.username):\(self.password)"
-        guard let loginData = loginString.data(using: .utf8) else { return }
-        let base64LoginString = loginData.base64EncodedString()
-        
-        var request = URLRequest(url: URL(string: "https://api.vrchat.cloud/api/1/auth/user")!)
-        request.httpMethod = "GET"
-        request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
-        request.setValue("chrome/1.0", forHTTPHeaderField: "User-Agent")
-        
-        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            guard let data = data, error == nil else {
-                DispatchQueue.main.async {
-                    self.alertMessage = loginFailedMessage
+
+        NetworkManager.login(loginId: username, password: password) { result in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                switch result {
+                case .success:
+                    self.isLoggedIn = true
+                    self.navigateToTwoFactor = true
+                case .failure(let error):
+                    self.alertMessage = error.localizedDescription
                     self.showAlert = true
-                }
-                return
-            }
-            if let httpStatus = response as? HTTPURLResponse {
-                print(httpStatus)
-                if httpStatus.statusCode == 200 {
-                    DispatchQueue.main.async {
-                        self.isLoggedIn = true;
-                        self.navigateToTwoFactor = true
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        self.alertMessage = loginErrorMessage
-                        self.showAlert = true
-                        self.username = ""  // ユーザー名のリセット
-                        self.password = ""  // パスワードのリセット
-                    }
+                    self.username = ""  // ユーザー名のリセット
+                    self.password = ""  // パスワードのリセット
                 }
             }
         }
-        task.resume()
     }
     private func forceLogin() {
-        self.isLoggedIn = true
-        self.navigateToTwoFactor = true
+        if self.navigateToTwoFactor {   //遷移先から戻ったときの処理
+            self.navigateToTwoFactor = false
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { // 遅延しないと再遷移しない
+            self.isLoggedIn = true
+            self.navigateToTwoFactor = true
+        }
     }
 }
