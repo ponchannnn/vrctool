@@ -9,7 +9,18 @@
 /* Begin PBXBuildFile section */
 		D302C2D42CEA2080004371D6 /* InstanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D302C2D32CEA2080004371D6 /* InstanceView.swift */; };
 		D302C2D82CEA30EA004371D6 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D302C2D72CEA30EA004371D6 /* NetworkManager.swift */; };
+		D31E97AC2EDB4D1A000A0152 /* WorldTabContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31E97AB2EDB4D12000A0152 /* WorldTabContainerView.swift */; };
+		D31E97AE2EDB58AB000A0152 /* UserWorldListContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31E97AD2EDB58A4000A0152 /* UserWorldListContainer.swift */; };
+		D31E97B02EDB5EF5000A0152 /* NotificationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31E97AF2EDB5EEB000A0152 /* NotificationListView.swift */; };
+		D31E97B22EDB63CA000A0152 /* GroupListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31E97B12EDB63C5000A0152 /* GroupListView.swift */; };
+		D31E97B82EDB7607000A0152 /* SimpleWorldListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31E97B72EDB7602000A0152 /* SimpleWorldListView.swift */; };
+		D31E97BE2EDBA156000A0152 /* UserTabContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31E97BD2EDBA151000A0152 /* UserTabContainerView.swift */; };
+		D31E97C02EDC7BFC000A0152 /* GroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31E97BF2EDC7BF9000A0152 /* GroupView.swift */; };
+		D31E97C22EDCE607000A0152 /* WorldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31E97C12EDCE603000A0152 /* WorldView.swift */; };
+		D31E97C42EDF4912000A0152 /* UserListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31E97C32EDF490D000A0152 /* UserListView.swift */; };
+		D31E97D02EE02CEE000A0152 /* SimpleUserListBiew.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31E97CF2EE02CE7000A0152 /* SimpleUserListBiew.swift */; };
 		D325B5A32CF46D0800D373A6 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D325B5A22CF46D0800D373A6 /* ProfileView.swift */; };
+		D35CD85A2ED8925000D47794 /* WorldListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35CD8592ED8924600D47794 /* WorldListView.swift */; };
 		D3676F882CEA53AD00306019 /* UserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3676F872CEA53AD00306019 /* UserView.swift */; };
 		D372B60C2BA6AA9300B5AF94 /* vrctoolApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D372B60B2BA6AA9300B5AF94 /* vrctoolApp.swift */; };
 		D372B60E2BA6AA9300B5AF94 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D372B60D2BA6AA9300B5AF94 /* ContentView.swift */; };
@@ -45,7 +56,18 @@
 /* Begin PBXFileReference section */
 		D302C2D32CEA2080004371D6 /* InstanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstanceView.swift; sourceTree = "<group>"; };
 		D302C2D72CEA30EA004371D6 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
+		D31E97AB2EDB4D12000A0152 /* WorldTabContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldTabContainerView.swift; sourceTree = "<group>"; };
+		D31E97AD2EDB58A4000A0152 /* UserWorldListContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserWorldListContainer.swift; sourceTree = "<group>"; };
+		D31E97AF2EDB5EEB000A0152 /* NotificationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationListView.swift; sourceTree = "<group>"; };
+		D31E97B12EDB63C5000A0152 /* GroupListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupListView.swift; sourceTree = "<group>"; };
+		D31E97B72EDB7602000A0152 /* SimpleWorldListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleWorldListView.swift; sourceTree = "<group>"; };
+		D31E97BD2EDBA151000A0152 /* UserTabContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserTabContainerView.swift; sourceTree = "<group>"; };
+		D31E97BF2EDC7BF9000A0152 /* GroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupView.swift; sourceTree = "<group>"; };
+		D31E97C12EDCE603000A0152 /* WorldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldView.swift; sourceTree = "<group>"; };
+		D31E97C32EDF490D000A0152 /* UserListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListView.swift; sourceTree = "<group>"; };
+		D31E97CF2EE02CE7000A0152 /* SimpleUserListBiew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleUserListBiew.swift; sourceTree = "<group>"; };
 		D325B5A22CF46D0800D373A6 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		D35CD8592ED8924600D47794 /* WorldListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldListView.swift; sourceTree = "<group>"; };
 		D3676F872CEA53AD00306019 /* UserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserView.swift; sourceTree = "<group>"; };
 		D372B6082BA6AA9300B5AF94 /* vrctool.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = vrctool.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D372B60B2BA6AA9300B5AF94 /* vrctoolApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = vrctoolApp.swift; sourceTree = "<group>"; };
@@ -89,6 +111,102 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D31E97C52EDF53D8000A0152 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				D31E97C62EDF53EE000A0152 /* Shared */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		D31E97C62EDF53EE000A0152 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				D372B60B2BA6AA9300B5AF94 /* vrctoolApp.swift */,
+				D372B60D2BA6AA9300B5AF94 /* ContentView.swift */,
+				D372B60F2BA6AA9400B5AF94 /* Assets.xcassets */,
+				D39DE2D52BAEC33100733A51 /* SelectTabView.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		D31E97C72EDF542D000A0152 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				D31E97C82EDF5434000A0152 /* Services */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		D31E97C82EDF5434000A0152 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				D302C2D72CEA30EA004371D6 /* NetworkManager.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		D31E97C92EDF5461000A0152 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				D372B6352BA6AF2500B5AF94 /* LoginView.swift */,
+				D3914AEC2BAB061100EF2924 /* TwoFactorAuthView.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		D31E97CA2EDF5489000A0152 /* Users */ = {
+			isa = PBXGroup;
+			children = (
+				D31E97CF2EE02CE7000A0152 /* SimpleUserListBiew.swift */,
+				D31E97C32EDF490D000A0152 /* UserListView.swift */,
+				D31E97BD2EDBA151000A0152 /* UserTabContainerView.swift */,
+				D3676F872CEA53AD00306019 /* UserView.swift */,
+				D325B5A22CF46D0800D373A6 /* ProfileView.swift */,
+			);
+			path = Users;
+			sourceTree = "<group>";
+		};
+		D31E97CB2EDF54CB000A0152 /* Worlds */ = {
+			isa = PBXGroup;
+			children = (
+				D31E97C12EDCE603000A0152 /* WorldView.swift */,
+				D31E97B72EDB7602000A0152 /* SimpleWorldListView.swift */,
+				D31E97AB2EDB4D12000A0152 /* WorldTabContainerView.swift */,
+				D35CD8592ED8924600D47794 /* WorldListView.swift */,
+				D302C2D32CEA2080004371D6 /* InstanceView.swift */,
+				D31E97AD2EDB58A4000A0152 /* UserWorldListContainer.swift */,
+			);
+			path = Worlds;
+			sourceTree = "<group>";
+		};
+		D31E97CC2EDF54FE000A0152 /* Groups */ = {
+			isa = PBXGroup;
+			children = (
+				D31E97BF2EDC7BF9000A0152 /* GroupView.swift */,
+				D31E97B12EDB63C5000A0152 /* GroupListView.swift */,
+			);
+			path = Groups;
+			sourceTree = "<group>";
+		};
+		D31E97CD2EDF551C000A0152 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				D31E97CE2EDF5523000A0152 /* Dashboard */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		D31E97CE2EDF5523000A0152 /* Dashboard */ = {
+			isa = PBXGroup;
+			children = (
+				D31E97AF2EDB5EEB000A0152 /* NotificationListView.swift */,
+				D372B6372BA6AF7800B5AF94 /* HomeView.swift */,
+				D39DE2D72BAEC34D00733A51 /* EventCalendarView.swift */,
+			);
+			path = Dashboard;
+			sourceTree = "<group>";
+		};
 		D372B5FF2BA6AA9300B5AF94 = {
 			isa = PBXGroup;
 			children = (
@@ -112,19 +230,14 @@
 		D372B60A2BA6AA9300B5AF94 /* vrctool */ = {
 			isa = PBXGroup;
 			children = (
-				D372B60B2BA6AA9300B5AF94 /* vrctoolApp.swift */,
-				D372B60D2BA6AA9300B5AF94 /* ContentView.swift */,
-				D372B60F2BA6AA9400B5AF94 /* Assets.xcassets */,
+				D31E97CD2EDF551C000A0152 /* Home */,
+				D31E97CC2EDF54FE000A0152 /* Groups */,
+				D31E97CB2EDF54CB000A0152 /* Worlds */,
+				D31E97CA2EDF5489000A0152 /* Users */,
+				D31E97C92EDF5461000A0152 /* Auth */,
+				D31E97C72EDF542D000A0152 /* Core */,
+				D31E97C52EDF53D8000A0152 /* App */,
 				D372B6112BA6AA9400B5AF94 /* Preview Content */,
-				D372B6352BA6AF2500B5AF94 /* LoginView.swift */,
-				D3914AEC2BAB061100EF2924 /* TwoFactorAuthView.swift */,
-				D39DE2D52BAEC33100733A51 /* SelectTabView.swift */,
-				D372B6372BA6AF7800B5AF94 /* HomeView.swift */,
-				D39DE2D72BAEC34D00733A51 /* EventCalendarView.swift */,
-				D302C2D32CEA2080004371D6 /* InstanceView.swift */,
-				D302C2D72CEA30EA004371D6 /* NetworkManager.swift */,
-				D3676F872CEA53AD00306019 /* UserView.swift */,
-				D325B5A22CF46D0800D373A6 /* ProfileView.swift */,
 			);
 			path = vrctool;
 			sourceTree = "<group>";
@@ -285,14 +398,25 @@
 			buildActionMask = 2147483647;
 			files = (
 				D302C2D82CEA30EA004371D6 /* NetworkManager.swift in Sources */,
+				D35CD85A2ED8925000D47794 /* WorldListView.swift in Sources */,
+				D31E97C02EDC7BFC000A0152 /* GroupView.swift in Sources */,
+				D31E97BE2EDBA156000A0152 /* UserTabContainerView.swift in Sources */,
+				D31E97B22EDB63CA000A0152 /* GroupListView.swift in Sources */,
+				D31E97D02EE02CEE000A0152 /* SimpleUserListBiew.swift in Sources */,
 				D39DE2D62BAEC33100733A51 /* SelectTabView.swift in Sources */,
+				D31E97AC2EDB4D1A000A0152 /* WorldTabContainerView.swift in Sources */,
+				D31E97C42EDF4912000A0152 /* UserListView.swift in Sources */,
 				D3914AED2BAB061100EF2924 /* TwoFactorAuthView.swift in Sources */,
 				D372B6362BA6AF2500B5AF94 /* LoginView.swift in Sources */,
 				D39DE2D82BAEC34D00733A51 /* EventCalendarView.swift in Sources */,
+				D31E97AE2EDB58AB000A0152 /* UserWorldListContainer.swift in Sources */,
+				D31E97B02EDB5EF5000A0152 /* NotificationListView.swift in Sources */,
 				D372B6382BA6AF7800B5AF94 /* HomeView.swift in Sources */,
 				D302C2D42CEA2080004371D6 /* InstanceView.swift in Sources */,
+				D31E97B82EDB7607000A0152 /* SimpleWorldListView.swift in Sources */,
 				D3676F882CEA53AD00306019 /* UserView.swift in Sources */,
 				D372B60E2BA6AA9300B5AF94 /* ContentView.swift in Sources */,
+				D31E97C22EDCE607000A0152 /* WorldView.swift in Sources */,
 				D325B5A32CF46D0800D373A6 /* ProfileView.swift in Sources */,
 				D372B60C2BA6AA9300B5AF94 /* vrctoolApp.swift in Sources */,
 			);

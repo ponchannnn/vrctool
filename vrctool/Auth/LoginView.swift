@@ -103,9 +103,11 @@ struct LoginView: View {
             DispatchQueue.main.async {
                 self.isLoading = false
                 switch result {
-                case .success:
+                case .success(let data):
                     self.isLoggedIn = true
                     self.navigateToTwoFactor = true
+                    saveUserData(jsonString: data)
+
                 case .failure(let error):
                     self.alertMessage = error.localizedDescription
                     self.showAlert = true
@@ -115,6 +117,32 @@ struct LoginView: View {
             }
         }
     }
+
+    private func saveUserData(jsonString: String) {
+        if let jsonData = jsonString.data(using: .utf8) {
+            // データを保存
+            @AppStorage("Profile") var userData = jsonData
+            
+            // データを読み込み
+            if let userData = loadUserData() {
+                print(userData)
+            }
+        }
+    }
+
+    func loadUserData() -> [String: Any]? {
+    let userDefaults = UserDefaults.standard
+    if let jsonData = userDefaults.data(forKey: "Profile") {
+        do {
+            let userData = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
+            return userData
+        } catch {
+            print("Failed to decode JSON data: \(error)")
+        }
+    }
+    return nil
+}
+
     private func forceLogin() {
         if self.navigateToTwoFactor {   //遷移先から戻ったときの処理
             self.navigateToTwoFactor = false
