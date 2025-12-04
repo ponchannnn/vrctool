@@ -50,6 +50,7 @@ struct UserListView: View {
     @State private var searchText = ""
     @State private var sortOption: UserSortOption = .lastLoginNewest
     @State private var filter = UserFilter()
+    @State private var showFilterSheet = false
     
     var processedUsers: [User] {
         var result = users
@@ -93,6 +94,9 @@ struct UserListView: View {
                 onSearch(searchText)
             }
         }
+        .sheet(isPresented: $showFilterSheet) {
+            UserFilterSheet(filter: $filter)
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
@@ -106,28 +110,11 @@ struct UserListView: View {
                         Label("Sort", systemImage: "arrow.up.arrow.down")
                     }
                     
-                    Menu {
-                        Section("Status") {
-                            filterToggle(title: "Online (Join Me)", key: "join me", set: $filter.statuses)
-                            filterToggle(title: "Online (Active)", key: "active", set: $filter.statuses)
-                            filterToggle(title: "Online (Busy)", key: "busy", set: $filter.statuses)
-                            filterToggle(title: "Offline", key: "offline", set: $filter.statuses)
-                        }
-                        Section("Platform") {
-                            filterToggle(title: "PC", key: "standalonewindows", set: $filter.platforms)
-                            filterToggle(title: "Quest/Android", key: "android", set: $filter.platforms)
-                        }
-                        Section {
-                            Toggle(isOn: $filter.onlyFriends) {
-                                Label("Friends Only", systemImage: "person.2.fill")
-                            }
-                        }
-                        Button(role: .destructive) { filter = UserFilter() } label: {
-                            Label("Reset Filters", systemImage: "xmark.circle")
-                        }
+                    Button {
+                        showFilterSheet = true
                     } label: {
                         let isActive = !filter.platforms.isEmpty || !filter.statuses.isEmpty || filter.onlyFriends
-                        Label("Filter", systemImage: isActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                        Label("Filter...", systemImage: isActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
                     }
                     
                 } label: {
@@ -151,6 +138,78 @@ struct UserListView: View {
             else { set.wrappedValue.insert(key) }
         } label: {
             Label(title, systemImage: set.wrappedValue.contains(key) ? "checkmark.square.fill" : "square")
+        }
+    }
+}
+
+struct UserFilterSheet: View {
+    @Binding var filter: UserFilter
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Status") {
+                    filterRow(title: "Online (Join Me)", key: "join me", set: $filter.statuses)
+                    filterRow(title: "Online (Active)", key: "active", set: $filter.statuses)
+                    filterRow(title: "Online (Busy)", key: "busy", set: $filter.statuses)
+                    filterRow(title: "Offline", key: "offline", set: $filter.statuses)
+                }
+                
+                Section("Platform") {
+                    filterRow(title: "PC", key: "standalonewindows", set: $filter.platforms)
+                    filterRow(title: "Quest/Android", key: "android", set: $filter.platforms)
+                }
+                
+                Section {
+                    Toggle(isOn: $filter.onlyFriends) {
+                        Label("Friends Only", systemImage: "person.2.fill")
+                            .foregroundColor(.primary)
+                    }
+                }
+                
+                Section {
+                    Button(role: .destructive) {
+                        filter = UserFilter()
+                    } label: {
+                        Text("Reset Filters")
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+            }
+            .navigationTitle("Filter Users")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .fontWeight(.bold)
+                }
+            }
+        }
+        // ハーフモーダル (iOS 16+)
+        .presentationDetents([.medium, .large])
+    }
+    
+    func filterRow(title: String, key: String, set: Binding<Set<String>>) -> some View {
+        Button {
+            if set.wrappedValue.contains(key) {
+                set.wrappedValue.remove(key)
+            } else {
+                set.wrappedValue.insert(key)
+            }
+        } label: {
+            HStack {
+                Text(title)
+                    .foregroundColor(.primary)
+                Spacer()
+                if set.wrappedValue.contains(key) {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(.blue)
+                        .fontWeight(.bold)
+                }
+            }
         }
     }
 }

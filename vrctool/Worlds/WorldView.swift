@@ -19,6 +19,9 @@ struct World: Codable, Identifiable {
     
     let occupants: Int?
     
+    let favoriteId: String?
+    let favoriteGroup: String?
+    
     let description: String?
     let visits: Int?
     let favorites: Int?

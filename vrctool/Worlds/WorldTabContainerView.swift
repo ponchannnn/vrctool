@@ -53,6 +53,14 @@ struct WorldTabContainerView: View {
     @State private var hasMoreData = true
     let limit = 100
     
+    @State private var favoriteGroups: [FavoriteGroup] = []
+    @State private var selectedGroupTag: String? = nil
+    @State private var currentGroupName: String = "Select Group"
+    
+    @State private var currentApiSearchQuery = ""
+    
+    @State private var favoriteWorldsCache: [String: [World]] = [:]
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -77,21 +85,72 @@ struct WorldTabContainerView: View {
                     hasMoreData: hasMoreData,
                     emptyMessage: emptyMessage
                 )
-                .id(selectedCategory)   // IDをつけることで、タブが変わるたびにWorldListViewの状態をリセットする
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
-            .navigationTitle("Worlds")
-            .onChange(of: selectedCategory) { _ in
+            .navigationTitle(selectedCategory == .favorites ? "" : "Worlds")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                if selectedCategory == .favorites {
+                    ToolbarItem(placement: .principal) {
+                        Menu {
+                            if favoriteGroups.isEmpty {
+                                Button {
+                                    loadFavoriteGroups()
+                                } label: {
+                                    Label("グループを読み込む", systemImage: "arrow.clockwise")
+                                }
+                                .onAppear { loadFavoriteGroups() }
+                            } else {
+                                Text("Select Group")
+                                ForEach(favoriteGroups) { group in
+                                    Button {
+                                        selectFavoriteGroup(group)
+                                    } label: {
+                                        if group.name == selectedGroupTag {
+                                            Label(group.label, systemImage: "checkmark")
+                                        } else {
+                                            Text(group.label)
+                                        }
+                                    }
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Text(currentGroupName)
+                                    .font(.headline).foregroundColor(.primary)
+                                Image(systemName: "chevron.down.circle.fill")
+                                    .font(.caption).foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                }
+            }
+            .onChange(of: selectedCategory) { newValue in
+                if newValue == .favorites && favoriteGroups.isEmpty {
+                    loadFavoriteGroups()
+                }
+                if newValue == .favorites,
+                   let tag = selectedGroupTag,
+                   let cached = favoriteWorldsCache[tag] {
+                    self.isLoading = false
+                    self.worlds = cached
+                    return
+                }
                 resetAndFetch()
+            
             }
             .onAppear {
                 if worlds.isEmpty && selectedCategory != .search {
-                    resetAndFetch()
+                    if selectedCategory == .favorites {
+                        loadFavoriteGroups()
+                    } else {
+                        resetAndFetch()
+                    }
                 }
             }
         }
     }
-    
+        
     var currentSearchConfig: SearchConfig {
         if selectedCategory == .search || selectedCategory == .active {
             return .apiSearch { query in
@@ -109,24 +168,62 @@ struct WorldTabContainerView: View {
         return "ワールドが見つかりません"
     }
     
+    func loadFavoriteGroups() {
+        isLoading = true
+        NetworkManager.request(endpoint: "favorite/groups") { (result: Result<[FavoriteGroup], Error>) in
+            DispatchQueue.main.async {
+                if case .success(let groups) = result {
+                    self.favoriteGroups = groups.filter { $0.type == "world" }
+                    if let first = self.favoriteGroups.first {
+                        selectFavoriteGroup(first)
+                    } else {
+                        self.isLoading = false
+                    }
+                } else {
+                    self.isLoading = false
+                }
+            }
+        }
+    }
+    
+    func selectFavoriteGroup(_ group: FavoriteGroup) {
+        self.selectedGroupTag = group.name
+        self.currentGroupName = group.label
+        
+        if let cachedWorlds = favoriteWorldsCache[group.name] {
+            self.worlds = cachedWorlds
+            self.isLoading = false
+            return
+        }
+        resetAndFetch()
+    }
+    
     func resetAndFetch(searchQuery: String? = nil) {
         self.worlds = []
         self.offset = 0
         self.hasMoreData = true
         self.isLoading = true
-
+        
         if let query = searchQuery {
-            fetchData(isLoadMore: false, searchQuery: query)
+            self.currentApiSearchQuery = query
         } else {
-            fetchData(isLoadMore: false, searchQuery: nil)
+            self.currentApiSearchQuery = ""
+        }
+        if self.selectedCategory == .favorites {
+            loadFavoriteGroups()
+        }
+        fetchData(isLoadMore: false, searchQuery: self.currentApiSearchQuery)
+    }
+    
+    func loadMoreData(searchQuery: String? = nil) {
+        guard hasMoreData && !isLoading else { return }
+        if let query = searchQuery {
+            fetchData(isLoadMore: true, searchQuery: query)
+        } else {
+            fetchData(isLoadMore: true)
         }
     }
-
-    func loadMoreData() {
-        guard hasMoreData && !isLoading else { return }
-        fetchData(isLoadMore: true)
-    }
-
+    
     func fetchData(isLoadMore: Bool, searchQuery: String? = nil) {
         self.isLoading = true
         if selectedCategory == .search || selectedCategory == .active {
@@ -158,23 +255,38 @@ struct WorldTabContainerView: View {
                     self.isLoading = false
                 }
             }
-        } else {
+        } else if selectedCategory == .favorites {
+            guard let tag = selectedGroupTag else { return }
+            
+            let query = [
+                URLQueryItem(name: "type", value: "world"),
+                URLQueryItem(name: "tag", value: tag),
+                URLQueryItem(name: "n", value: "100")
+            ]
+            
+            NetworkManager.fetchAll(endpoint: selectedCategory.apiPath, baseQueryItems: query) { (result: Result<[World], Error>) in
+                DispatchQueue.main.async {
+                    if case .success(let favs) = result {
+                        self.hasMoreData = false
+                        self.favoriteWorldsCache[tag] = favs
+                    } else {
+                        self.isLoading = false
+                    }
+                }
+            }
+        } else if selectedCategory == .recent {
             NetworkManager.fetchAll(endpoint: selectedCategory.apiPath) { (result: Result<[World], Error>) in
                 DispatchQueue.main.async {
-                    switch result {
-                    case .success(let allWorlds):
-                        self.worlds = allWorlds
+                    if case .success(let data) = result {
+                        self.worlds = data
                         self.hasMoreData = false
-                        self.offset = allWorlds.count
-                    case .failure(let error):
-                        print("FetchAll Error: \(error)")
                     }
                     self.isLoading = false
                 }
             }
         }
     }
-
+    
     func refreshData() async {
         await MainActor.run {
             self.offset = 0

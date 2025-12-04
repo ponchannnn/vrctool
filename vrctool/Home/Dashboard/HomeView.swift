@@ -343,6 +343,7 @@ struct FriendCard: View {
         switch friend.status {
         case "join me": return .blue
         case "active": return .green
+        case "ask me": return .orange
         case "busy": return .red
         case "offline": return .gray
         default: return .green
@@ -406,6 +407,7 @@ struct FriendCard: View {
             .background(Color(uiColor: .secondarySystemGroupedBackground))
             .cornerRadius(12)
             .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+            .frame(width: 110)
         }
         .buttonStyle(PlainButtonStyle())
     }

@@ -71,11 +71,44 @@ struct UserTabContainerView: View {
                 
                 contentView
             }
-            .navigationTitle(navigationTitle)
+            .navigationTitle(selectedTab == .favorites ? "" : navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
+            
+            .toolbar {
+                if selectedTab == .favorites {
+                    ToolbarItem(placement: .principal) {
+                        Menu {
+                            Text("Select Group")
+                            ForEach(favoriteGroups) { group in
+                                Button {
+                                    loadFavorites(in: group)
+                                } label: {
+                                    if group.name == selectedGroupTag {
+                                        Label(group.label, systemImage: "checkmark")
+                                    } else {
+                                        Text(group.label)
+                                    }
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Text(currentGroupName)
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                                Image(systemName: "chevron.down.circle.fill")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                }
+            }
             .onAppear {
                 if allFriends.isEmpty && selectedTab != .search {
                     Task { await loadAllFriends() }
+                }
+                if selectedTab == .favorites && favoriteGroups.isEmpty {
+                    loadFavoriteGroups()
                 }
             }
         }
@@ -103,9 +136,6 @@ struct UserTabContainerView: View {
                         .multilineTextAlignment(.center).foregroundColor(.secondary).padding()
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .toolbar {
-                    favoriteGroupMenu
-                }
             } else {
                 UserListView(
                     users: favorites,
@@ -115,9 +145,6 @@ struct UserTabContainerView: View {
                     hasMoreData: false,
                     onRefresh: { await refreshFavorites() }
                 )
-                .toolbar {
-                    favoriteGroupMenu
-                }
             }
             
         case .search:
@@ -140,24 +167,6 @@ struct UserTabContainerView: View {
         case .all: return "All Friends"
         case .favorites: return currentGroupName
         case .search: return "Search"
-        }
-    }
-    
-    var favoriteGroupMenu: some ToolbarContent {
-        ToolbarItem(placement: .topBarTrailing) {
-            Menu {
-                Text("Groups")
-                ForEach(favoriteGroups) { group in
-                    Button { loadFavorites(in: group) } label: {
-                        Label(group.label, systemImage: group.name == selectedGroupTag ? "checkmark" : "")
-                    }
-                }
-            } label: {
-                HStack {
-                    Text(currentGroupName).font(.caption).fontWeight(.bold)
-                    Image(systemName: "line.3.horizontal.decrease.circle.fill").font(.title3)
-                }
-            }
         }
     }
     
