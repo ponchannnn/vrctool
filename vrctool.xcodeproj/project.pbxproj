@@ -67,6 +67,7 @@
 		D31E97C32EDF490D000A0152 /* UserListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListView.swift; sourceTree = "<group>"; };
 		D31E97CF2EE02CE7000A0152 /* SimpleUserListBiew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleUserListBiew.swift; sourceTree = "<group>"; };
 		D325B5A22CF46D0800D373A6 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		D3276AA92EE3550800322279 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		D35CD8592ED8924600D47794 /* WorldListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldListView.swift; sourceTree = "<group>"; };
 		D3676F872CEA53AD00306019 /* UserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserView.swift; sourceTree = "<group>"; };
 		D372B6082BA6AA9300B5AF94 /* vrctool.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = vrctool.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -214,6 +215,7 @@
 				D372B61B2BA6AA9400B5AF94 /* vrctoolTests */,
 				D372B6252BA6AA9400B5AF94 /* vrctoolUITests */,
 				D372B6092BA6AA9300B5AF94 /* Products */,
+				D3276AA92EE3550800322279 /* .gitignore */,
 			);
 			sourceTree = "<group>";
 		};

@@ -331,8 +331,7 @@ struct WorldHeaderView: View {
                 .foregroundColor(.gray.opacity(0.4))
                 .font(.caption)
         }
-        .padding() // カード内部での余白
-        // ここでの背景色や影は削除しました
+        .padding()
     }
 }
 
@@ -361,7 +360,7 @@ struct FriendCard: View {
                             image
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
-                                .frame(height: 100) // 高さを固定
+                                .frame(maxHeight: .infinity) // 高さを固定
                                 .frame(maxWidth: .infinity)
                                 .clipped()
                         } placeholder: {
@@ -413,6 +412,6 @@ struct FriendCard: View {
     }
 }
 
-//#Preview {
-//    HomeView()
-//}
+#Preview {
+    HomeView()
+}

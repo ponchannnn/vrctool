@@ -1,1 +1,21 @@
 vrctool.xcodeproj/project.xcworkspace/xcuserdata/yamato.xcuserdatad/UserInterfaceState.xcuserstate
+# --- Xcode ---
+# ビルド生成ファイル
+build/
+DerivedData/
+
+# ユーザー固有の設定（これらをコミットするとチーム開発でコンフリクトの原因になります）
+*.xcuserdata/
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.pbxuser
+
+# その他Xcodeの一時ファイル
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+# --- macOS ---
+# システムファイル
+.DS_Store
