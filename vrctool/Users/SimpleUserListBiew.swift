@@ -43,10 +43,10 @@ struct SimpleUserListView: View {
                                     onLoadMore()
                                 }
                             }
-                            if hasMoreData {
-                                ProgressView()
-                                    .padding()
-                            }
+                        }
+                        if hasMoreData {
+                            ProgressView()
+                                .padding()
                         }
                     }
                     .padding()

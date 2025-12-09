@@ -5,10 +5,18 @@ struct ContentView: View {
     @AppStorage("isTwoFactored") private var isTwoFactored: Bool = false
     
     var body: some View {
-        if isLoggedIn && isTwoFactored { //ログインしていたら
-            SelectTabView()
-        } else {    //ログインしてなかったら
-            LoginView()
+        Group {
+            if isLoggedIn && isTwoFactored { //ログインしていたら
+                SelectTabView()
+            } else {    //ログインしてなかったら
+                LoginView()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .logoutRequired)) { _ in
+            // 401通知が来たら強制ログアウト
+            withAnimation {
+                isLoggedIn = false
+            }
         }
     }
 }

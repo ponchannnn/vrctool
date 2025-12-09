@@ -20,13 +20,14 @@ enum SearchConfig {
 }
 
 struct UnityPackage: Codable {
-    let assetUrl: String
+    let assetUrl: String?
     let assetVersion: Int
-    let created_at: String
+    let created_at: String?
     let id: String
     let platform: String
-    let unitySortNumber: Int
+    let unitySortNumber: Int?
     let unityVersion: String
+    let performanceRating: String?
 }
 
 struct WorldListView: View {

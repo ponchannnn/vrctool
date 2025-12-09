@@ -238,22 +238,25 @@ struct UserView: View {
     func userActionMenu(user: User) -> some View {
         Menu {
             Section {
-                NavigationLink(destination: UserWorldListContainer(userId: user.id, userName: user.safeDisplayName)) {
+                NavigationLink(destination: UserWorldListContainer(
+                    userId: user.id,
+                    userName: user.safeDisplayName,
+                    isFriend: user.isFriend ?? false
+                )) {
                     Label("ワールド一覧", systemImage: "globe")
-                }
-                Button(action: { print("Open Avatar List") }) {
-                    Label("アバター一覧", systemImage: "person.fill.viewfinder")
                 }
                 Button(action: { print("Open Group List") }) {
                     Label("グループ一覧", systemImage: "person.3.fill")
                 }
             }
             
-            // ンスタンス操作 (相手がどこかにいる場合のみ)
-            if let location = user.location, !location.isEmpty, location != "offline", location != "private" {
+            // インスタンス操作 (相手がどこかにいる場合のみ)
+            if let location = user.location, user.isFriend == true && !location.isEmpty, location != "offline"{
                 Section {
-                    Button(action: { inviteMyself(location: location) }) {
-                        Label("自分を招待 (Invite Myself)", systemImage: "arrow.uturn.left")
+                    if location != "private" {
+                        Button(action: { inviteMyself(location: location) }) {
+                            Label("自分を招待 (Invite Myself)", systemImage: "arrow.uturn.left")
+                        }
                     }
                     Button(action: { requestInvite(userId: user.id) }) {
                         Label("招待をリクエスト (Req Invite)", systemImage: "envelope.fill")
@@ -262,13 +265,6 @@ struct UserView: View {
                         Label("相手を招待 (Invite)", systemImage: "paperplane.fill")
                     }
                 }
-            } else {
-                // 相手がオフライン等の場合でも、相手を呼び出す(Invite)だけはできる
-                 Section {
-                     Button(action: { sendInvite(userId: user.id) }) {
-                         Label("相手を招待 (Invite)", systemImage: "paperplane.fill")
-                     }
-                 }
             }
             
             // フレンド操作
@@ -329,7 +325,7 @@ struct UserView: View {
     // 招待リクエストを送る (Request Invite)
     func requestInvite(userId: String) {
         performAction("招待リクエスト") { completion in
-            NetworkManager.action(endpoint: "user/\(userId)/notification", method: "POST", body: ["type": "requestInvite"], completion: completion)
+            NetworkManager.action(endpoint: "requestInvite/\(userId)", method: "POST", completion: completion)
         }
     }
     
@@ -340,11 +336,10 @@ struct UserView: View {
             case .success(let me):
                 if let location = me.currentInstanceLocation {
                     let body: [String: Any] = [
-                        "type": "invite",
-                        "details": ["worldId": location] // worldIdキーに "wrld:instance"
+                        "details": ["instanceId": location]
                     ]
                     
-                    NetworkManager.action(endpoint: "user/\(userId)/notification", method: "POST", body: body) { res in
+                    NetworkManager.action(endpoint: "invite/\(userId)", method: "POST", body: body) { res in
                         DispatchQueue.main.async {
                             if case .failure(let error) = res {
                                 self.saveMessage = "招待送信失敗: \(error.localizedDescription)"
