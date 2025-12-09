@@ -5,50 +5,73 @@ struct TwoFactorAuthView: View {
     @State private var code: String = ""
     @State private var alertMessage: String = ""
     @State private var showAlert: Bool = false
-    @State private var editting1 = false
+    @State private var isLoading = false
+    
+    @FocusState private var isFocused: Bool
 
     var body: some View {
-        NavigationStack {
-            VStack {
-                TextField("コードを入力してください", text: $code,
-                      onEditingChanged: { begin in
-                          /// 入力開始処理
-                          if begin {
-                              self.editting1 = true    // 編集フラグをオン
-                                  
-                              /// 入力終了処理
-                          } else {
-                              self.editting1 = false   // 編集フラグをオフ
-                          }
-                      }
-                  )
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-                .keyboardType(.decimalPad)
-                .shadow(color: editting1 ? .blue : .clear, radius: 3)
-
-                Button(action: {
-                    self.authenticate()
-                }) {
-                    Text("認証")
-                }
-                .padding()
+        ZStack {
+            Color(uiColor: .systemGroupedBackground).ignoresSafeArea()
+            
+            VStack(spacing: 30) {
                 
-                Button(action: {
-                    UserDefaults.standard.set(true, forKey: "isTwoFactored")
-                    self.isTwoFactored = true
-                }) {
-                    Text("強制認証")
+                VStack(spacing: 10) {
+                    Image(systemName: "lock.shield.fill")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 60, height: 60)
+                        .foregroundColor(.green)
+                    
+                    Text("2段階認証")
+                        .font(.title)
+                        .fontWeight(.bold)
+                    
+                    Text("メールに届いた認証コードを入力してください")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
-                .padding()
-
-                NavigationLink(destination: SelectTabView(), isActive: $isTwoFactored) {
-                    EmptyView()
+                .padding(.top, 40)
+                
+                // コード入力欄
+                CustomInputField(
+                    iconName: "key.fill",
+                    placeholder: "123456",
+                    text: $code,
+                    keyboardType: .numberPad,
+                    isFocused: isFocused
+                )
+                .focused($isFocused)
+                .padding(.horizontal)
+                
+                // ボタンエリア
+                VStack(spacing: 15) {
+                    if isLoading {
+                        ProgressView()
+                    } else {
+                        Button(action: authenticate) {
+                            Text("認証する")
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(code.isEmpty ? Color.gray : Color.green)
+                                .cornerRadius(10)
+                                .shadow(radius: 2)
+                        }
+                        .disabled(code.isEmpty)
+                    }
                 }
+                .padding(.horizontal)
+                
+                Spacer()
             }
-            .alert(isPresented: $showAlert) {
-                Alert(title: Text("エラー"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
-            }
+            .padding()
+        }
+        .navigationDestination(isPresented: $isTwoFactored) {
+             SelectTabView()
+        }
+        .alert(isPresented: $showAlert) {
+            Alert(title: Text("通知"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
         }
     }
 

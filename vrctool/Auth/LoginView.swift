@@ -12,93 +12,104 @@ struct LoginView: View {
     @State private var editting1 = false
     @State private var isLoading = false
     
-
-    private let loginFailedMessage = "ログインに失敗しました。もう一度お試しください。"
-    private let loginErrorMessage = "ログインに失敗しました。"
+    @FocusState private var focusedField: Field?
+    enum Field {
+        case username
+        case password
+    }
 
     var body: some View {
         NavigationStack {
-            VStack {
-                Text("ログイン")
-                    .font(.largeTitle)
-                    .padding(.bottom, 20)
+            ZStack {
+                Color(uiColor: .systemGroupedBackground)
+                    .ignoresSafeArea()
                 
-                TextField("ユーザー名", text: $username,
-                          onEditingChanged: { begin in
-                        /// 入力開始処理
-                        if begin {
-                            self.editting1 = true    // 編集フラグをオン
-
-                            /// 入力終了処理
+                VStack(spacing: 30) {
+                    VStack(spacing: 10) {
+                        Image(systemName: "person.crop.circle.fill.badge.checkmark") // アプリのロゴがあればそれに変更
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 80, height: 80)
+                            .foregroundColor(.blue)
+                        
+                        Text("VRCTool Login")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                    }
+                    .padding(.top, 40)
+                    
+                    // 入力フォームエリア
+                    VStack(spacing: 20) {
+                        CustomInputField(
+                            iconName: "person.fill",
+                            placeholder: "ユーザー名 / メールアドレス",
+                            text: $username,
+                            isFocused: focusedField == .username
+                        )
+                        .focused($focusedField, equals: .username)
+                        
+                        CustomInputField(
+                            iconName: "lock.fill",
+                            placeholder: "パスワード",
+                            text: $password,
+                            isSecure: true,
+                            isFocused: focusedField == .password
+                        )
+                        .focused($focusedField, equals: .password)
+                    }
+                    .padding(.horizontal)
+                    
+                    // ログインボタンエリア
+                    VStack(spacing: 15) {
+                        if isLoading {
+                            ProgressView()
+                                .scaleEffect(1.5)
                         } else {
-                            self.editting1 = false   // 編集フラグをオフ
+                            Button(action: login) {
+                                Text("ログイン")
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(isFormValid ? Color.blue : Color.gray)
+                                    .cornerRadius(10)
+                                    .shadow(radius: 2)
+                            }
+                            .disabled(!isFormValid)
                         }
                     }
-                )
-                    .padding()
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(5)
-                    .padding(.bottom, 20)
-                    .keyboardType(.default)
-                    .autocorrectionDisabled(true)
-                    .autocapitalization(.none)
-                    .shadow(color: editting1 ? .blue : .clear, radius: 3)
-                
-                SecureField("パスワード", text: $password)
-                    .padding()
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(5)
-                    .padding(.bottom, 20)
-                
-                NavigationLink(destination: TwoFactorAuthView(), isActive: $navigateToTwoFactor) {
-                    EmptyView()
+                    .padding(.horizontal)
+                    
+                    Spacer()
                 }
-                
-                if isLoading {
-                    ProgressView()
-                        .padding(.bottom, 20)
-                } else {
-                    Button(action: login) {
-                        Text("ログイン")
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.blue)
-                            .cornerRadius(5)
-                    }
-                    .padding(.bottom, 20)
-                }
-                
-                Button(action: forceLogin) {
-                    Text("強制ログイン")
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .cornerRadius(5)
-                }
-                .padding(.bottom, 20)
+                .padding()
             }
-            .padding()
+            .navigationDestination(isPresented: $navigateToTwoFactor) {
+                TwoFactorAuthView()
+            }
+            .alert("エラー", isPresented: $showAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(alertMessage)
+            }
             .onAppear {
                 if isLoggedIn {
                     navigateToTwoFactor = true
                 }
             }
-            .alert("エラー", isPresented: $showAlert) {
-                    Button("OK", role: .cancel) {}
-                } message: {
-                    Text(self.alertMessage)
-                }
         }
     }
 
-    private func login() {
-        self.isLoading = true
-        if self.navigateToTwoFactor {   //遷移先から戻ったときの処理
-            self.navigateToTwoFactor = false
-        }
+    var isFormValid: Bool {
+        !username.isEmpty && !password.isEmpty
+    }
 
+    private func login() {
+        // キーボードを閉じる
+        focusedField = nil
+        self.isLoading = true
+        
         NetworkManager.login(loginId: username, password: password) { result in
             DispatchQueue.main.async {
                 self.isLoading = false
@@ -106,13 +117,12 @@ struct LoginView: View {
                 case .success(let data):
                     self.isLoggedIn = true
                     self.navigateToTwoFactor = true
-                    saveUserData(jsonString: data)
+                    self.saveUserData(jsonString: data)
 
                 case .failure(let error):
-                    self.alertMessage = error.localizedDescription
+                    self.alertMessage = "ログインに失敗しました。\n\(error.localizedDescription)"
                     self.showAlert = true
-                    self.username = ""  // ユーザー名のリセット
-                    self.password = ""  // パスワードのリセット
+                    self.password = "" // パスワードのみリセット
                 }
             }
         }
@@ -120,37 +130,42 @@ struct LoginView: View {
 
     private func saveUserData(jsonString: String) {
         if let jsonData = jsonString.data(using: .utf8) {
-            // データを保存
+            // プロフィール情報の保存
             @AppStorage("Profile") var userData = jsonData
-            
-            // データを読み込み
-            if let userData = loadUserData() {
-                print(userData)
-            }
         }
     }
-
-    func loadUserData() -> [String: Any]? {
-    let userDefaults = UserDefaults.standard
-    if let jsonData = userDefaults.data(forKey: "Profile") {
-        do {
-            let userData = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
-            return userData
-        } catch {
-            print("Failed to decode JSON data: \(error)")
-        }
-    }
-    return nil
 }
 
-    private func forceLogin() {
-        if self.navigateToTwoFactor {   //遷移先から戻ったときの処理
-            self.navigateToTwoFactor = false
+struct CustomInputField: View {
+    let iconName: String
+    let placeholder: String
+    @Binding var text: String
+    var isSecure: Bool = false
+    var keyboardType: UIKeyboardType = .default
+    var isFocused: Bool
+    
+    var body: some View {
+        HStack {
+            Image(systemName: iconName)
+                .foregroundColor(isFocused ? .blue : .gray)
+                .frame(width: 20)
+            
+            if isSecure {
+                SecureField(placeholder, text: $text)
+            } else {
+                TextField(placeholder, text: $text)
+                    .keyboardType(keyboardType)
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
+            }
         }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { // 遅延しないと再遷移しない
-            self.isLoggedIn = true
-            self.navigateToTwoFactor = true
-        }
+        .padding()
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .cornerRadius(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(isFocused ? Color.blue : Color.clear, lineWidth: 2)
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 2)
     }
 }

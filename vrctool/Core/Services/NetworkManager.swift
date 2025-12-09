@@ -1,5 +1,9 @@
 import Foundation
 
+extension Notification.Name {
+    static let logoutRequired = Notification.Name("LogoutRequired")
+}
+
 struct NetworkManager {
     static func login(loginId: String, password: String, completion: @escaping (Result<String, Error>) -> Void) {
         // cookieあれば削除
@@ -397,7 +401,7 @@ struct NetworkManager {
         // 2. リクエスト作成
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("chrome/1.0", forHTTPHeaderField: "User-Agent")
+        request.setValue("vrctool/1.0", forHTTPHeaderField: "User-Agent")
         
         // 3. 通信実行
         URLSession.shared.dataTask(with: request) { data, response, error in
@@ -411,11 +415,27 @@ struct NetworkManager {
                 return
             }
             
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode == 401 {
+                    print("⚠️ 401 Unauthorized: Session Expired")
+                    
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(name: .logoutRequired, object: nil)
+                    }
+                    
+                    completion(.failure(NSError(domain: "Unauthorized", code: 401)))
+                    return
+                }
+            }
+            
             // 4. 汎用デコード (T型としてデコードする)
             do {
                 let decodedData = try JSONDecoder().decode(T.self, from: data)
                 completion(.success(decodedData))
             } catch {
+                if let rawString = String(data: data, encoding: .utf8) {
+                    print("⚠️ Raw Response for \(endpoint): \(rawString)")
+                }
                 print("Decode Error for \(endpoint): \(error)")
                 completion(.failure(error))
             }
@@ -428,8 +448,7 @@ struct NetworkManager {
         guard let url = URL(string: baseUrl + endpoint) else { return }
         var request = URLRequest(url: url)
         request.httpMethod = method
-        request.setValue("MyVRCApp/1.0 (contact@example.com)", forHTTPHeaderField: "User-Agent")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("vrctool/1.0", forHTTPHeaderField: "User-Agent")
         
         if let body = body {
             request.httpBody = try? JSONSerialization.data(withJSONObject: body)
@@ -439,6 +458,18 @@ struct NetworkManager {
             if let error = error {
                 completion(.failure(error))
                 return
+            }
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode == 401 {
+                    print("⚠️ 401 Unauthorized: Session Expired")
+                    
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(name: .logoutRequired, object: nil)
+                    }
+                    
+                    completion(.failure(NSError(domain: "Unauthorized", code: 401)))
+                    return
+                }
             }
             guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
                 completion(.failure(NSError(domain: "Error", code: 0)))
