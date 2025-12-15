@@ -100,38 +100,6 @@ struct NetworkManager {
             }.resume()
         }
     
-    static func fetchMe(completion: @escaping (Result<CurrentUser, Error>) -> Void) {
-        guard let url = URL(string: "https://api.vrchat.cloud/api/1/auth/user") else {
-            completion(.failure(NSError(domain: "Invalid URL", code: 0, userInfo: nil)))
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        
-        request.setValue("chrome/1.0", forHTTPHeaderField: "User-Agent")
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            guard let data = data else {
-                completion(.failure(NSError(domain: "No Data", code: 0, userInfo: nil)))
-                return
-            }
-            
-            do {
-                let me = try JSONDecoder().decode(CurrentUser.self, from: data)
-                completion(.success(me))
-            } catch {
-                completion(.failure(error))
-            }
-        }.resume()
-    }
-    
-    
     static func inviteMyselfToInstance(instanceId: String, completion: @escaping (Result<Void, Error>) -> Void) {
         guard let url = URL(string: "https://vrchat.com/api/1/invite/myself/to/\(instanceId)") else {
             print("Invalid URL")
@@ -442,19 +410,20 @@ struct NetworkManager {
         }.resume()
     }
     
-    static func action(endpoint: String, method: String = "POST", body: [String: Any]? = nil, completion: @escaping (Result<String, Error>) -> Void) {
+    static func action<T: Codable>(endpoint: String, method: String = "POST", body: [String: Any]? = nil, completion: @escaping (Result<T, Error>) -> Void) {
             
         let baseUrl = "https://api.vrchat.cloud/api/1/"
         guard let url = URL(string: baseUrl + endpoint) else { return }
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("vrctool/1.0", forHTTPHeaderField: "User-Agent")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         if let body = body {
             request.httpBody = try? JSONSerialization.data(withJSONObject: body)
         }
         
-        URLSession.shared.dataTask(with: request) { _, response, error in
+        URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 completion(.failure(error))
                 return
@@ -475,7 +444,25 @@ struct NetworkManager {
                 completion(.failure(NSError(domain: "Error", code: 0)))
                 return
             }
-            completion(.success("Success"))
+            guard let data = data else {
+                completion(.failure(NSError(domain: "No Data", code: 0)))
+                return
+            }
+            do {
+                if T.self == String.self {
+                    let str = String(data: data, encoding: .utf8) ?? "Success"
+                    completion(.success(str as! T))
+                } else {
+                    let decodedObject = try JSONDecoder().decode(T.self, from: data)
+                    completion(.success(decodedObject))
+                }
+            } catch {
+                print("Decode Error: \(error)")
+                if let rawStr = String(data: data, encoding: .utf8) {
+                    print("Raw Response: \(rawStr)")
+                }
+                completion(.failure(error))
+            }
         }.resume()
     }
     

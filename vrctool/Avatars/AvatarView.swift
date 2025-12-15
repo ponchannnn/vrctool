@@ -333,7 +333,7 @@ struct AvatarView: View {
     func selectAvatar() {
         guard let id = avatar?.id else { return }
         
-        NetworkManager.action(endpoint: "avatars/\(id)/select", method: "PUT") { result in
+        NetworkManager.action(endpoint: "avatars/\(id)/select", method: "PUT") { (result: Result<String, Error>) in
             DispatchQueue.main.async {
                 if case .success = result {
                     self.alertMessage = "アバターを変更しました"
@@ -348,7 +348,7 @@ struct AvatarView: View {
     func selectFallbackAvatar() {
         guard let id = avatar?.id else { return }
         
-        NetworkManager.action(endpoint: "avatars/\(id)/selectFallback", method: "PUT") { result in
+        NetworkManager.action(endpoint: "avatars/\(id)/selectFallback", method: "PUT") { (result: Result<String, Error>) in
             DispatchQueue.main.async {
                 if case .success = result {
                     self.alertMessage = "フォールバックアバターを変更しました"

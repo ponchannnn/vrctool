@@ -205,7 +205,7 @@ struct InstanceView: View {
     
     func inviteMyself() {
         guard let id = instance?.id else { return }
-        NetworkManager.action(endpoint: "instances/\(id)/invite", method: "POST") { result in
+        NetworkManager.action(endpoint: "instances/\(id)/invite", method: "POST") { (result: Result<String, Error>) in
             DispatchQueue.main.async {
                 if case .success = result {
                     self.alertMessage = "招待を送りました"
@@ -520,7 +520,7 @@ struct InviteFriendSheet: View {
     
     func sendInvite(to userId: String) {
         let body: [String: Any] = ["type": "invite", "details": ["worldId": instanceId]]
-        NetworkManager.action(endpoint: "user/\(userId)/notification", method: "POST", body: body) { result in
+        NetworkManager.action(endpoint: "user/\(userId)/notification", method: "POST", body: body) { (result: Result<String, Error>) in
             DispatchQueue.main.async {
                 if case .success = result {
                     self.resultMessage = "招待を送りました"

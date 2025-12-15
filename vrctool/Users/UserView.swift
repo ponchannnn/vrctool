@@ -2,10 +2,10 @@ import SwiftUI
 
 struct Badge: Codable, Identifiable {
     let badgeId: String
-    let badgeName: String
-    let badgeDescription: String
-    let badgeImageUrl: String
-    let showcased: Bool
+    let badgeName: String?
+    let badgeDescription: String?
+    let badgeImageUrl: String?
+    let showcased: Bool?
     
     var id: String { badgeId }
 }
@@ -199,8 +199,8 @@ struct UserView: View {
         // バッジタップ時のアラート
         .alert(item: $selectedBadge) { badge in
             Alert(
-                title: Text(badge.badgeName),
-                message: Text(badge.badgeDescription),
+                title: Text(badge.badgeName ?? "Badge"),
+                message: Text(badge.badgeDescription ?? "No description"),
                 dismissButton: .default(Text("OK"))
             )
         }
@@ -339,9 +339,9 @@ struct UserView: View {
                         "details": ["instanceId": location]
                     ]
                     
-                    NetworkManager.action(endpoint: "invite/\(userId)", method: "POST", body: body) { res in
+                    NetworkManager.action(endpoint: "invite/\(userId)", method: "POST", body: body) { (result: Result<CurrentUser, Error>) in
                         DispatchQueue.main.async {
-                            if case .failure(let error) = res {
+                            if case .failure(let error) = result {
                                 self.saveMessage = "招待送信失敗: \(error.localizedDescription)"
                                 self.showSaveAlert = true
                             } else {
@@ -543,7 +543,7 @@ struct UserView: View {
             
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 50))], spacing: 10) {
                 ForEach(user.badges ?? []) { badge in
-                    if let url = URL(string: badge.badgeImageUrl) {
+                    if let urlString = badge.badgeImageUrl, let url = URL(string: urlString) {
                         AsyncImage(url: url) { image in
                             image
                                 .resizable()
