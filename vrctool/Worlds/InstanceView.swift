@@ -364,7 +364,7 @@ struct InstanceView: View {
     func groupInfoSection(group: UserGroup) -> some View {
         VStack(alignment: .leading, spacing: 15) {
             Text("Group").font(.headline)
-            NavigationLink(destination: Text("Group Detail: \(group.name)")) {
+            NavigationLink(destination: Text("Group Detail: \(group.safeName)")) {
                 HStack(spacing: 12) {
                     if let iconId = group.iconId, !iconId.isEmpty,
                        let url = URL(string: "https://api.vrchat.cloud/api/1/file/\(iconId)/1/file") {
@@ -387,8 +387,8 @@ struct InstanceView: View {
                     }
                     
                     VStack(alignment: .leading) {
-                        Text(group.name).font(.headline).foregroundColor(.primary)
-                        Text("@\(group.shortCode) • \(group.discriminator)")
+                        Text(group.safeName).font(.headline).foregroundColor(.primary)
+                        Text(group.fullCode)
                             .font(.caption).foregroundColor(.secondary)
                     }
                     Spacer()

@@ -245,7 +245,7 @@ struct UserView: View {
                 )) {
                     Label("ワールド一覧", systemImage: "globe")
                 }
-                Button(action: { print("Open Group List") }) {
+                NavigationLink(destination: GroupListView(userId: user.id)) {
                     Label("グループ一覧", systemImage: "person.3.fill")
                 }
             }
