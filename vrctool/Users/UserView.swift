@@ -132,8 +132,9 @@ struct UserView: View {
     @State private var showActionSheet = false
     
     var body: some View {
-        ScrollView {
+        Group {
             if let user = user {
+                ScrollView {
                 VStack(spacing: 0) {
                     // ヘッダー画像 (Profile Pic Override 優先)
                     headerImageSection(user: user)
@@ -175,15 +176,18 @@ struct UserView: View {
                     }
                     .padding()
                 }
+                }
+                .background(Color(uiColor: .systemGroupedBackground))
             } else if isLoading {
                 ProgressView("Loading...")
-                    .padding(.top, 50)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(uiColor: .systemBackground))
             } else {
                 Text("Failed to load user.")
-                    .padding(.top, 50)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(uiColor: .systemBackground))
             }
         }
-        .background(Color(uiColor: .systemGroupedBackground))
         .navigationTitle(user?.displayName ?? "Profile")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

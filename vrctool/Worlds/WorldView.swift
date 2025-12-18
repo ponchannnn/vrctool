@@ -196,9 +196,10 @@ struct WorldView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
+            Group {
                 if let world = world {
-                    VStack(spacing: 20) {
+                    ScrollView {
+                        VStack(spacing: 20) {
                         headerSection(world: world)
                         
                         VStack(alignment: .leading, spacing: 20) {
@@ -242,16 +243,19 @@ struct WorldView: View {
                         }
                         .padding()
                     }
+                    }
+                    .background(Color(uiColor: .systemGroupedBackground))
                 } else if isLoading {
                     ProgressView("Loading World...")
-                        .padding(.top, 100)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color(uiColor: .systemBackground))
                 } else {
                     Text("Failed to load world.")
                         .foregroundColor(.secondary)
-                        .padding(.top, 100)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color(uiColor: .systemBackground))
                 }
             }
-            .background(Color(uiColor: .systemGroupedBackground))
             .edgesIgnoringSafeArea(.top)
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {

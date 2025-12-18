@@ -23,12 +23,18 @@ struct GroupPostListView: View {
     }
     
     var body: some View {
-        List {
+        Group {
             if isLoading {
-                HStack { Spacer(); ProgressView(); Spacer() }
+                 ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(uiColor: .systemBackground))
             } else if posts.isEmpty {
-                Text("No news posts.")
-            }
+                 Text("No news posts.")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(uiColor: .systemBackground))
+                    .foregroundColor(.secondary)
+            } else {
+                List {
             
             ForEach(posts) { post in
                 VStack(alignment: .leading, spacing: 8) {
@@ -72,6 +78,8 @@ struct GroupPostListView: View {
                         }
                         .tint(.blue)
                     }
+                }
+            }
                 }
             }
         }

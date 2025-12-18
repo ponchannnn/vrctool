@@ -110,8 +110,9 @@ struct ProfileView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
+            Group {
                 if let user = currentUser {
+                    ScrollView {
                     VStack(spacing: 0) {
                         // ヘッダー画像
                         headerImageSection(user: user)
@@ -181,16 +182,19 @@ struct ProfileView: View {
                         }
                         .padding()
                     }
+                    }
+                    .background(Color(uiColor: .systemGroupedBackground))
                 } else if isLoading {
                     ProgressView("Loading Profile...")
-                        .padding(.top, 50)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color(uiColor: .systemBackground))
                 } else {
                     Text(errorMessage.isEmpty ? "Failed to load profile" : errorMessage)
                         .foregroundColor(.red)
-                        .padding(.top, 50)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color(uiColor: .systemBackground))
                 }
             }
-            .background(Color(uiColor: .systemGroupedBackground))
             .navigationTitle("My Profile")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {

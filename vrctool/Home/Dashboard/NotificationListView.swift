@@ -69,45 +69,54 @@ struct NotificationListView: View {
     @State private var navigationUserId: String?
     
     var body: some View {
-        List {
-            if isLoading {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
-                }
+        Group {
+            if isLoading && notifications.isEmpty {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(uiColor: .systemBackground))
             } else if notifications.isEmpty {
                 Text("通知はありません")
-                    .foregroundColor(.secondary)
+                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                     .background(Color(uiColor: .systemBackground))
+                     .foregroundColor(.secondary)
             } else {
-                ForEach(notifications) { notif in
-                    NotificationRow(notif: notif)
-                        .contentShape(Rectangle()) // タップ領域を広げる
-                        .onTapGesture {
-                            selectedNotification = notif
+                List {
+                    if isLoading {
+                        HStack {
+                           Spacer()
+                           ProgressView()
+                           Spacer()
                         }
-                        .contextMenu {
-                            // 長押しメニュー
-                            if let userId = notif.senderUserId {
-                                Button {
-                                    navigationUserId = userId
-                                } label: {
-                                    Label("プロフィール", systemImage: "person.circle")
+                    }
+                    ForEach(notifications) { notif in
+                        NotificationRow(notif: notif)
+                            .contentShape(Rectangle()) // タップ領域を広げる
+                            .onTapGesture {
+                                selectedNotification = notif
+                            }
+                            .contextMenu {
+                                // 長押しメニュー
+                                if let userId = notif.senderUserId {
+                                    Button {
+                                        navigationUserId = userId
+                                    } label: {
+                                        Label("プロフィール", systemImage: "person.circle")
+                                    }
+                                }
+                                
+                                if notif.type == "friendRequest" {
+                                    Button {
+                                        // 承認処理 (NetworkManager.action...)
+                                    } label: {
+                                        Label("承認", systemImage: "checkmark")
+                                    }
                                 }
                             }
-                            
-                            if notif.type == "friendRequest" {
-                                Button {
-                                    // 承認処理 (NetworkManager.action...)
-                                } label: {
-                                    Label("承認", systemImage: "checkmark")
-                                }
-                            }
-                        }
+                    }
                 }
+                .listStyle(.plain)
             }
         }
-        .listStyle(.plain)
         .navigationTitle("Notifications")
         .navigationDestination(isPresented: Binding(    // ios!7以上はitemで処理可
             get: { navigationUserId != nil },
