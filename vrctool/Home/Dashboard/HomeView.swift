@@ -21,102 +21,106 @@ struct HomeView: View {
     @State private var showMyProfile = false
 
     var body: some View {
-            NavigationStack {
-                ScrollView {
-                    if isLoading {
-                        ProgressView("Loading Friends...")
-                            .padding(.top, 50)
-                    } else if friends.isEmpty {
-                        VStack(spacing: 20) {
-                            Image(systemName: "person.slash.fill")
-                                .font(.system(size: 60))
-                                .foregroundColor(.gray.opacity(0.5))
-                            Text("フレンドがいません")
-                                .font(.headline)
-                                .foregroundColor(.secondary)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 100)
-                        
-                    } else {
-                        VStack(spacing: 20) {
-                            ForEach(groupedActiveFriends, id: \.key) { (worldId, friendsInWorld) in
+        NavigationStack {
+            Group {
+                if isLoading {
+                    ProgressView("Loading Friends...")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        if friends.isEmpty {
+                            VStack(spacing: 20) {
+                                Image(systemName: "person.slash.fill")
+                                    .font(.system(size: 60))
+                                    .foregroundColor(.gray.opacity(0.5))
+                                Text("フレンドがいません")
+                                    .font(.headline)
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 100)
+                            
+                        } else {
+                            VStack(spacing: 20) {
+                                ForEach(groupedActiveFriends, id: \.key) { (worldId, friendsInWorld) in
+                                    
+                                    VStack(alignment: .leading, spacing: 0) {
+                                        
+                                        if let world = worldCache[worldId] {
+                                            NavigationLink(destination: InstanceView(instanceId: friendsInWorld.first?.location ?? worldId)) {
+                                                WorldHeaderView(world: world, friendCount: friendsInWorld.count)
+                                            }
+                                            .buttonStyle(PlainButtonStyle())
+                                        } else {
+                                            Text("World ID: \(worldId)")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                                .padding()
+                                        }
+                                        
+                                        Divider()
+                                        
+                                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 12)], spacing: 12) {
+                                            ForEach(friendsInWorld) { friend in
+                                                FriendCard(friend: friend)
+                                            }
+                                        }
+                                        .padding(15)
+                                    }
+                                    .background(Color(uiColor: .secondarySystemGroupedBackground))
+                                    .cornerRadius(16)
+                                    .shadow(color: Color.black.opacity(0.08), radius: 5, x: 0, y: 2)
+                                    .padding(.horizontal)
+                                }
                                 
-                                VStack(alignment: .leading, spacing: 0) {
-                                    
-                                    if let world = worldCache[worldId] {
-                                        NavigationLink(destination: InstanceView(instanceId: friendsInWorld.first?.location ?? worldId)) {
-                                            WorldHeaderView(world: world, friendCount: friendsInWorld.count)
-                                        }
-                                        .buttonStyle(PlainButtonStyle())
-                                    } else {
-                                        Text("World ID: \(worldId)")
-                                            .font(.caption)
+                                // Private ワールドにいるフレンド
+                                if !privateFriends.isEmpty {
+                                    VStack(alignment: .leading, spacing: 10) {
+                                        Label("Private / Other", systemImage: "lock.fill")
+                                            .font(.headline)
                                             .foregroundColor(.secondary)
-                                            .padding()
-                                    }
-                                    
-                                    Divider()
-                                    
-                                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 12)], spacing: 12) {
-                                        ForEach(friendsInWorld) { friend in
-                                            FriendCard(friend: friend)
+                                            .padding(.horizontal)
+                                            .padding(.top, 10)
+                                        
+                                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 12)], spacing: 12) {
+                                            ForEach(privateFriends) { friend in
+                                                FriendCard(friend: friend)
+                                            }
                                         }
-                                    }
-                                    .padding(15)
-                                }
-                                .background(Color(uiColor: .secondarySystemGroupedBackground))
-                                .cornerRadius(16)
-                                .shadow(color: Color.black.opacity(0.08), radius: 5, x: 0, y: 2)
-                                .padding(.horizontal)
-                            }
-                            
-                            // Private ワールドにいるフレンド
-                            if !privateFriends.isEmpty {
-                                VStack(alignment: .leading, spacing: 10) {
-                                    Label("Private / Other", systemImage: "lock.fill")
-                                        .font(.headline)
-                                        .foregroundColor(.secondary)
                                         .padding(.horizontal)
-                                        .padding(.top, 10)
-                                    
-                                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 12)], spacing: 12) {
-                                        ForEach(privateFriends) { friend in
-                                            FriendCard(friend: friend)
-                                        }
+                                        .padding(.bottom, 15)
                                     }
-                                    .padding(.horizontal)
-                                    .padding(.bottom, 15)
-                                }
-                                .background(Color(uiColor: .secondarySystemGroupedBackground))
-                                .cornerRadius(16)
-                                .shadow(color: Color.black.opacity(0.08), radius: 5, x: 0, y: 2)
-                                .padding(.horizontal)
-                            }
-                            
-                            // オフラインのフレンド
-                            if !offlineFriends.isEmpty {
-                                VStack(alignment: .leading) {
-                                    Label("Offline", systemImage: "moon.zzz.fill")
-                                        .font(.headline)
-                                        .foregroundColor(.secondary)
-                                        .padding(.horizontal)
-                                    
-                                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 110), spacing: 21)], spacing: 20) {
-                                        ForEach(offlineFriends) { friend in
-                                            FriendCard(friend: friend)
-                                                .opacity(0.6)
-                                        }
-                                    }
+                                    .background(Color(uiColor: .secondarySystemGroupedBackground))
+                                    .cornerRadius(16)
+                                    .shadow(color: Color.black.opacity(0.08), radius: 5, x: 0, y: 2)
                                     .padding(.horizontal)
                                 }
-                                .padding(.vertical)
+                                
+                                // オフラインのフレンド
+                                if !offlineFriends.isEmpty {
+                                    VStack(alignment: .leading) {
+                                        Label("Offline", systemImage: "moon.zzz.fill")
+                                            .font(.headline)
+                                            .foregroundColor(.secondary)
+                                            .padding(.horizontal)
+                                        
+                                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 110), spacing: 21)], spacing: 20) {
+                                            ForEach(offlineFriends) { friend in
+                                                FriendCard(friend: friend)
+                                                    .opacity(0.6)
+                                            }
+                                        }
+                                        .padding(.horizontal)
+                                    }
+                                    .padding(.vertical)
+                                }
                             }
+                            .padding(.vertical)
                         }
-                        .padding(.vertical)
                     }
                 }
-                .background(Color(uiColor: .systemGroupedBackground))
+            }
+            .background(Color(uiColor: .systemGroupedBackground))
                 .navigationTitle("Home")
                 // ツールバー
                 .toolbar {
@@ -157,7 +161,7 @@ struct HomeView: View {
                     Text("Login View Placeholder")
                 }
             }
-        }
+    }
 
     func logout() {
         // ログアウト処理

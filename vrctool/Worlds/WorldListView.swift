@@ -87,6 +87,8 @@ struct WorldListView: View {
         VStack {
             if isLoading && displayedWorlds.isEmpty {
                 ProgressView("Loading Worlds...")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(uiColor: .systemBackground))
             } else if displayedWorlds.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "globe.asia.australia.fill")

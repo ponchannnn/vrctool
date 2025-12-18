@@ -622,8 +622,9 @@ struct GroupView: View {
     }
     
     var mainScrollView: some View {
-        ScrollView {
+        Group {
             if let group = group {
+                ScrollView {
                 VStack(spacing: 0) {
                     // ヘッダー (バナー + アイコン)
                     headerSection(group: group)
@@ -631,9 +632,12 @@ struct GroupView: View {
                     mainContent(group: group)
                         .padding()
                 }
+                }
+                .background(Color(uiColor: .systemGroupedBackground))
             } else if isLoading {
                 ProgressView("Loading Group...")
-                    .padding(.top, 50)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(uiColor: .systemBackground))
             } else {
                 VStack(spacing: 16) {
                     Image(systemName: "exclamationmark.triangle")
@@ -649,11 +653,10 @@ struct GroupView: View {
                         }
                     }
                 }
-                .padding(.top, 50)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(uiColor: .systemBackground))
             }
         }
-        .background(Color(uiColor: .systemGroupedBackground))
-        .navigationTitle(group?.safeName ?? "Group")
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $showMembers) {
             SimpleUserListView(

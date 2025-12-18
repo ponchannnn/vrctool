@@ -12,18 +12,25 @@ struct GroupListView: View {
     @State private var isLoading = true
     
     var body: some View {
-        List {
-            if isLoading { ProgressView() }
-            ForEach(groups) { group in
-                NavigationLink(destination: GroupView(groupId: group.safeId)) {
-                    HStack {
-                        if let url = URL(string: group.iconUrl ?? "") {
-                            AsyncImage(url: url) { i in i.resizable() } placeholder: { Color.gray }
-                                .frame(width: 40, height: 40).cornerRadius(8)
-                        }
-                        VStack(alignment: .leading) {
-                            Text(group.safeName).font(.headline)
-                            Text(group.fullCode).font(.caption).foregroundColor(.secondary)
+        Group {
+            if isLoading && groups.isEmpty {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(uiColor: .systemBackground))
+            } else {
+                List {
+                    ForEach(groups) { group in
+                        NavigationLink(destination: GroupView(groupId: group.safeId)) {
+                            HStack {
+                                if let url = URL(string: group.iconUrl ?? "") {
+                                    AsyncImage(url: url) { i in i.resizable() } placeholder: { Color.gray }
+                                        .frame(width: 40, height: 40).cornerRadius(8)
+                                }
+                                VStack(alignment: .leading) {
+                                    Text(group.safeName).font(.headline)
+                                    Text(group.fullCode).font(.caption).foregroundColor(.secondary)
+                                }
+                            }
                         }
                     }
                 }

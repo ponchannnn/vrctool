@@ -55,11 +55,13 @@ struct GroupMemberListView: View {
     }
     
     var body: some View {
-        List {
+        Group {
             if isLoading {
                 ProgressView()
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(uiColor: .systemBackground))
             } else {
+                List {
                 ForEach(filteredMembers, id: \.id) { member in
                     // メンバー行の表示 (NavigationLinkで詳細へ)
                     if let user = member.user {
@@ -102,6 +104,8 @@ struct GroupMemberListView: View {
                             }
                         }
                     }
+                }
+            }
                 }
             }
         }

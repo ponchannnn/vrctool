@@ -140,8 +140,9 @@ struct InstanceView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
+            Group {
                 if let instance = instance {
+                    ScrollView {
                     VStack(spacing: 20) {
                         // ヘッダー (ワールド画像 + インスタンス名)
                         headerSection(instance: instance)
@@ -160,16 +161,19 @@ struct InstanceView: View {
                             worldDetailsSection(world: world)
                         }
                     }
+                    }
+                    .background(Color(uiColor: .systemGroupedBackground))
                 } else if isLoading {
                     ProgressView("Loading Instance...")
-                        .padding(.top, 100)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color(uiColor: .systemBackground))
                 } else {
                     Text("Failed to load instance.")
                         .foregroundColor(.secondary)
-                        .padding(.top, 100)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color(uiColor: .systemBackground))
                 }
             }
-            .background(Color(uiColor: .systemGroupedBackground))
             .edgesIgnoringSafeArea(.top)
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {

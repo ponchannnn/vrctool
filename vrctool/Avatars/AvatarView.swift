@@ -221,8 +221,9 @@ struct AvatarView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
+            Group {
                 if let avatar = avatar {
+                    ScrollView {
                     VStack(spacing: 20) {
                         // 1. ヘッダー
                         headerSection(avatar: avatar)
@@ -247,16 +248,19 @@ struct AvatarView: View {
                         }
                         .padding()
                     }
+                    }
+                    .background(Color(uiColor: .systemGroupedBackground))
                 } else if isLoading {
                     ProgressView("Loading Avatar...")
-                        .padding(.top, 100)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color(uiColor: .systemBackground))
                 } else {
                     Text("Failed to load avatar.")
                         .foregroundColor(.secondary)
-                        .padding(.top, 100)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color(uiColor: .systemBackground))
                 }
             }
-            .background(Color(uiColor: .systemGroupedBackground))
             .edgesIgnoringSafeArea(.top)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -291,9 +295,6 @@ struct AvatarView: View {
                     } label: {
                         Image(systemName: "ellipsis.circle")
                             .font(.system(size: 18))
-                            .padding(8)
-                            .background(.ultraThinMaterial)
-                            .clipShape(Circle())
                     }
                 }
             }

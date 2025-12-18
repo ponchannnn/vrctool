@@ -78,6 +78,7 @@ struct UserWorldListContainer: View {
                         if isFavoritesLoading {
                             ProgressView("Loading Groups...")
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .background(Color(uiColor: .systemBackground))
                         } else {
                             Text("Select a group").frame(maxWidth: .infinity, maxHeight: .infinity)
                         }

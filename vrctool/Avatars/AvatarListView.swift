@@ -114,7 +114,9 @@ struct AvatarListView: View {
     var body: some View {
         VStack {
             if isLoading && displayedAvatars.isEmpty {
-                ProgressView("Loading...").frame(maxWidth: .infinity, maxHeight: .infinity)
+                ProgressView("Loading...")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(uiColor: .systemBackground))
             } else if displayedAvatars.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "person.fill.viewfinder")

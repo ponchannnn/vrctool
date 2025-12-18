@@ -20,6 +20,7 @@ struct SimpleUserListView: View {
             if isLoading && users.isEmpty {
                 ProgressView("Loading...")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(uiColor: .systemBackground))
             } else if users.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "person.crop.circle.badge.questionmark")
