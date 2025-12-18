@@ -25,6 +25,8 @@
 		D3276AB12EE546AA00322279 /* AvatarTabContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3276AB02EE5469900322279 /* AvatarTabContainerView.swift */; };
 		D35CD85A2ED8925000D47794 /* WorldListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35CD8592ED8924600D47794 /* WorldListView.swift */; };
 		D35FBE5C2EE6DB350011DEF8 /* UserAvatarListContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35FBE5B2EE6DB250011DEF8 /* UserAvatarListContainer.swift */; };
+		D35FBE602EF4025C0011DEF8 /* GroupMemberListView.swift in Resources */ = {isa = PBXBuildFile; fileRef = D35FBE5F2EF4025C0011DEF8 /* GroupMemberListView.swift */; };
+		D35FBE622EF433430011DEF8 /* GroupPostListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35FBE612EF433350011DEF8 /* GroupPostListView.swift */; };
 		D3676F882CEA53AD00306019 /* UserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3676F872CEA53AD00306019 /* UserView.swift */; };
 		D372B60C2BA6AA9300B5AF94 /* vrctoolApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D372B60B2BA6AA9300B5AF94 /* vrctoolApp.swift */; };
 		D372B60E2BA6AA9300B5AF94 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D372B60D2BA6AA9300B5AF94 /* ContentView.swift */; };
@@ -77,6 +79,8 @@
 		D3276AB02EE5469900322279 /* AvatarTabContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarTabContainerView.swift; sourceTree = "<group>"; };
 		D35CD8592ED8924600D47794 /* WorldListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldListView.swift; sourceTree = "<group>"; };
 		D35FBE5B2EE6DB250011DEF8 /* UserAvatarListContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAvatarListContainer.swift; sourceTree = "<group>"; };
+		D35FBE5F2EF4025C0011DEF8 /* GroupMemberListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupMemberListView.swift; sourceTree = "<group>"; };
+		D35FBE612EF433350011DEF8 /* GroupPostListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupPostListView.swift; sourceTree = "<group>"; };
 		D3676F872CEA53AD00306019 /* UserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserView.swift; sourceTree = "<group>"; };
 		D372B6082BA6AA9300B5AF94 /* vrctool.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = vrctool.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D372B60B2BA6AA9300B5AF94 /* vrctoolApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = vrctoolApp.swift; sourceTree = "<group>"; };
@@ -192,6 +196,8 @@
 		D31E97CC2EDF54FE000A0152 /* Groups */ = {
 			isa = PBXGroup;
 			children = (
+				D35FBE612EF433350011DEF8 /* GroupPostListView.swift */,
+				D35FBE5F2EF4025C0011DEF8 /* GroupMemberListView.swift */,
 				D31E97BF2EDC7BF9000A0152 /* GroupView.swift */,
 				D31E97B12EDB63C5000A0152 /* GroupListView.swift */,
 			);
@@ -395,6 +401,7 @@
 			files = (
 				D372B6132BA6AA9400B5AF94 /* Preview Assets.xcassets in Resources */,
 				D372B6102BA6AA9400B5AF94 /* Assets.xcassets in Resources */,
+				D35FBE602EF4025C0011DEF8 /* GroupMemberListView.swift in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -441,6 +448,7 @@
 				D3676F882CEA53AD00306019 /* UserView.swift in Sources */,
 				D372B60E2BA6AA9300B5AF94 /* ContentView.swift in Sources */,
 				D3276AAD2EE4900600322279 /* AvatarView.swift in Sources */,
+				D35FBE622EF433430011DEF8 /* GroupPostListView.swift in Sources */,
 				D31E97C22EDCE607000A0152 /* WorldView.swift in Sources */,
 				D35FBE5C2EE6DB350011DEF8 /* UserAvatarListContainer.swift in Sources */,
 				D325B5A32CF46D0800D373A6 /* ProfileView.swift in Sources */,

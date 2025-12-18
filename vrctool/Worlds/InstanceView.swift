@@ -2,70 +2,116 @@ import SwiftUI
 
 // MARK: - Models
 
-struct Instance: Codable {
-    let active: Bool
-    let canRequestInvite: Bool
-    let capacity: Int
-    let clientNumber: String
+struct Instance: Codable, Identifiable {
+    let active: Bool?
+    let canRequestInvite: Bool?
+    let capacity: Int?
+    let clientNumber: String?
     let closedAt: String?
     let displayName: String?
-    let full: Bool
+    let full: Bool?
     let hardClose: String?
-    let hasCapacityForYou: Bool
-    let id: String
-    let instanceId: String
+    let hasCapacityForYou: Bool?
+    let id: String?
+    let instanceId: String?
     let instancePersistenceEnabled: Bool?
-    let location: String
-    let n_users: Int
-    let name: String
+    let location: String?
+    let n_users: Int?
+    let name: String?
     let ownerId: String?
     let creatorId: String?
-    let permanent: Bool
-    let photonRegion: String
-    let platforms: InstancePlatforms
+    let permanent: Bool?
+    let photonRegion: String?
+    let platforms: InstancePlatforms?
     let playerPersistenceEnabled: Bool?
-    let queueEnabled: Bool
-    let queueSize: Int
-    let recommendedCapacity: Int
-    let region: String
-    let secureName: String
+    let queueEnabled: Bool?
+    let queueSize: Int?
+    let recommendedCapacity: Int?
+    let region: String?
+    let secureName: String?
     let shortName: String?
-    let strict: Bool
-    let tags: [String]
-    let type: String
-    let userCount: Int
-    let world: World
-    let worldId: String
+    let strict: Bool?
+    let tags: [String]?
+    let type: String?
+    let userCount: Int?
+    let memberCount: Int?
+    let world: World?
+    let worldId: String?
+    let groupAccessType: String?
+    let ageGate: Bool?
+    
+    var safeId: String { id ?? UUID().uuidString }
+    var safeInstanceId: String { instanceId ?? "" }
+    var safeLocation: String { location ?? id ?? "" }
+    
+    var safeName: String {
+        // 名前が空ならインスタンスIDを表示、それもなければTypeを表示
+        if let n = name, !n.isEmpty { return n }
+        return safeInstanceId
+    }
+    
+    var safeDisplayName: String { displayName ?? safeName }
+    
+    var safeCapacity: Int { capacity ?? 0 }
+    var safeUserCount: Int { userCount ?? memberCount ?? n_users ?? 0 } // n_usersとuserCountどちらかが来る
+    var safeQueueSize: Int { queueSize ?? 0 }
+    
+    var safeRegion: String { region ?? "us" }
+    var safeType: String { type ?? "public" }
+    
+    var isActive: Bool { active ?? true }
+    var isFull: Bool { full ?? false }
+    
+    var safeWorldId: String { worldId ?? world?.id ?? "" }
+    var safeWorldName: String { world?.name ?? "Unknown World" }
     
 
     var typeInfo: (String, Color) {
-        switch type {
+        switch safeType.lowercased() {
         case "public": return ("Public", .green)
         case "hidden": return ("Friends+", .orange)
         case "friends": return ("Friends", .yellow)
         case "private": return ("Invite", .red)
-        default: return (type.capitalized, .gray)
+        case "group":
+            // グループの場合は詳細タイプ
+            if let access = groupAccessType {
+                switch access {
+                case "public": return ("Group Public", .blue)
+                case "plus": return ("Group+", .purple)
+                case "member": return ("Group Only", .indigo)
+                default: return ("Group", .blue)
+                }
+            }
+            return ("Group", .blue)
+        default: return (safeType.capitalized, .gray)
         }
     }
-    
-    // リージョンに応じた国旗
-    var regionFlag: String {
-        if region.lowercased().contains("jp") { return "🇯🇵 JP" }
-        if region.lowercased().contains("us") { return "🇺🇸 US" }
-        if region.lowercased().contains("eu") { return "🇪🇺 EU" }
-        return "🌐 \(region.uppercased())"
+
+    var safePlatforms: InstancePlatforms {
+        platforms ?? InstancePlatforms(android: 0, ios: 0, standalonewindows: 0)
     }
 }
 
 struct InstancePlatforms: Codable {
-    let android: Int
-    let ios: Int
-    let standalonewindows: Int
+    let android: Int?
+    let ios: Int?
+    let standalonewindows: Int?
     
-    // 対応プラットフォームがあるか
-    var hasPC: Bool { standalonewindows > 0 }
-    var hasQuest: Bool { android > 0 }
-    var hasMobile: Bool { ios > 0 || android > 0 }
+    var safeAndroid: Int { android ?? 0 }
+    var safeIos: Int { ios ?? 0 }
+    var safePC: Int { standalonewindows ?? 0 }
+    
+    var hasPCUsers: Bool { safePC > 0 }
+    var hasQuestUsers: Bool { safeAndroid > 0 }
+    var hasMobileUsers: Bool { safeIos > 0 }
+    
+    var platformIcons: String {
+        var icons = ""
+        if hasPCUsers { icons += "💻" }
+        if hasQuestUsers { icons += "🤖" } // Android/Quest
+        if hasMobileUsers { icons += "📱" } // iOS
+        return icons.isEmpty ? "-" : icons
+    }
 }
 
 // MARK: - Views
@@ -73,7 +119,7 @@ struct InstanceView: View {
     @State var instance: Instance?
     let instanceId: String?
     
-    @State private var group: UserGroup?
+    @State private var group: VRCGroup?
     
     @State private var isLoading = false
     @State private var errorMessage = ""
@@ -110,7 +156,9 @@ struct InstanceView: View {
                         Divider()
                         
                         // ワールド情報
-                        worldDetailsSection(world: instance.world)
+                        if let world = instance.world {
+                            worldDetailsSection(world: world)
+                        }
                     }
                 } else if isLoading {
                     ProgressView("Loading Instance...")
@@ -134,7 +182,7 @@ struct InstanceView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    if let instance = instance {
+                    if instance != nil {
                         Menu {
                             Section {
                                 Button(action: inviteMyself) {
@@ -159,7 +207,7 @@ struct InstanceView: View {
             }
             .sheet(isPresented: $showInviteSheet) {
                 if let instance = instance {
-                    InviteFriendSheet(instanceId: instance.id)
+                    InviteFriendSheet(instanceId: instance.safeId)
                 }
             }
             .alert(isPresented: $showAlert) {
@@ -191,9 +239,9 @@ struct InstanceView: View {
     
     func checkAndFetchGroup(instance: Instance) {
         // instanceIdの中に "grp_" が含まれていればグループインスタンス
-        if let range = instance.instanceId.range(of: "grp_[a-zA-Z0-9\\-]+", options: .regularExpression) {
-            let groupId = String(instance.instanceId[range])
-            NetworkManager.request(endpoint: "groups/\(groupId)") { (result: Result<UserGroup, Error>) in
+        if let range = instance.safeInstanceId.range(of: "grp_[a-zA-Z0-9\\-]+", options: .regularExpression) {
+            let groupId = String(instance.safeInstanceId[range])
+            NetworkManager.request(endpoint: "groups/\(groupId)") { (result: Result<VRCGroup, Error>) in
                 DispatchQueue.main.async {
                     if case .success(let info) = result {
                         self.group = info
@@ -222,7 +270,7 @@ struct InstanceView: View {
     func headerSection(instance: Instance) -> some View {
         GeometryReader { geometry in
             ZStack(alignment: .bottomLeading) {
-                if let url = URL(string: instance.world.imageUrl) {
+                if let world = instance.world, let url = URL(string: world.safeImageUrl) {
                     AsyncImage(url: url) { image in
                         image
                             .resizable()
@@ -240,15 +288,15 @@ struct InstanceView: View {
                     LinearGradient(colors: [.clear, .black.opacity(0.8)], startPoint: .center, endPoint: .bottom)
                     
                     VStack(alignment: .leading, spacing: 5) {
-                        Text("\(instance.world.name):\(instance.name)")
+                        Text("\(instance.safeWorldName):\(instance.safeName)")
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.white)
                             .lineLimit(2)
                             .shadow(radius: 4)
                         
                         HStack {
-                            if instance.active {
-                                Label("\(instance.n_users) / \(instance.capacity) Users", systemImage: "person.2.fill")
+                            if instance.isActive {
+                                Label("\(instance.safeUserCount) / \(instance.safeCapacity) Users", systemImage: "person.2.fill")
                                     .font(.headline)
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 10)
@@ -265,8 +313,8 @@ struct InstanceView: View {
                                     .cornerRadius(20)
                             }
                             
-                            if instance.full {
-                                Text("FULL(\(instance.n_users) / \(instance.capacity) Users)")
+                            if instance.isFull {
+                                Text("FULL(\(instance.safeUserCount) / \(instance.safeCapacity) Users)")
                                     .font(.caption)
                                     .fontWeight(.bold)
                                     .foregroundColor(.white)
@@ -288,28 +336,28 @@ struct InstanceView: View {
             HStack(alignment: .center, spacing: 0) {
                 // 人数
                 VStack {
-                    Text("\(instance.n_users) / \(instance.capacity)")
+                    Text("\(instance.safeUserCount) / \(instance.safeCapacity)")
                         .font(.title3).fontWeight(.bold)
-                        .foregroundColor(instance.full ? .red : .primary)
+                        .foregroundColor(instance.isFull ? .red : .primary)
                     
                     // プラットフォーム内訳
                     HStack(spacing: 6) {
-                        if instance.platforms.android > 0 {
+                        if instance.safePlatforms.safeAndroid > 0 {
                             HStack(spacing: 2) {
                                 Image(systemName: "circle.grid.2x2.fill").font(.caption2).foregroundColor(.green)
-                                Text("\(instance.platforms.android)").font(.caption2)
+                                Text("\(instance.safePlatforms.safeAndroid)").font(.caption2)
                             }
                         }
-                        if instance.platforms.standalonewindows > 0 {
+                        if instance.safePlatforms.safePC > 0 {
                             HStack(spacing: 2) {
                                 Image(systemName: "pc").font(.caption2).foregroundColor(.blue)
-                                Text("\(instance.platforms.standalonewindows)").font(.caption2)
+                                Text("\(instance.safePlatforms.safePC)").font(.caption2)
                             }
                         }
-                        if instance.platforms.ios > 0 {
+                        if instance.safePlatforms.safeIos > 0 {
                             HStack(spacing: 2) {
                                 Image(systemName: "iphone").font(.caption2).foregroundColor(.orange)
-                                Text("\(instance.platforms.ios)").font(.caption2)
+                                Text("\(instance.safePlatforms.safeIos)").font(.caption2)
                             }
                         }
                     }
@@ -320,7 +368,7 @@ struct InstanceView: View {
                 
                 // Region
                 VStack {
-                    Text(instance.regionFlag).font(.title2)
+                    Text(LanguageHelper.name(for: instance.safeRegion)).font(.title2)
                     Text("Region").font(.caption).foregroundColor(.secondary)
                 }
                 .frame(maxWidth: .infinity)
@@ -346,7 +394,7 @@ struct InstanceView: View {
                 }
             }
             
-            if instance.type == "group" || instance.instanceId.contains("groupAccessType(public)") {
+            if instance.safeType == "group" || instance.safeInstanceId.contains("groupAccessType(public)") {
                 if instance.closedAt == nil { Divider() }
                 HStack {
                     Image(systemName: "person.3.fill").foregroundColor(.blue)
@@ -361,10 +409,10 @@ struct InstanceView: View {
         .cornerRadius(12)
     }
     
-    func groupInfoSection(group: UserGroup) -> some View {
+    func groupInfoSection(group: VRCGroup) -> some View {
         VStack(alignment: .leading, spacing: 15) {
             Text("Group").font(.headline)
-            NavigationLink(destination: Text("Group Detail: \(group.name)")) {
+            NavigationLink(destination: GroupView(groupId: group.safeId)) {
                 HStack(spacing: 12) {
                     if let iconId = group.iconId, !iconId.isEmpty,
                        let url = URL(string: "https://api.vrchat.cloud/api/1/file/\(iconId)/1/file") {
@@ -387,8 +435,8 @@ struct InstanceView: View {
                     }
                     
                     VStack(alignment: .leading) {
-                        Text(group.name).font(.headline).foregroundColor(.primary)
-                        Text("@\(group.shortCode) • \(group.discriminator)")
+                        Text(group.safeName).font(.headline).foregroundColor(.primary)
+                        Text(group.fullCode)
                             .font(.caption).foregroundColor(.secondary)
                     }
                     Spacer()
@@ -416,21 +464,23 @@ struct InstanceView: View {
             }
             
             VStack(spacing: 0) {
-                NavigationLink(destination: UserView(userId: world.authorId)) {
-                    HStack {
-                        Text("Author").foregroundColor(.secondary)
-                        Spacer()
-                        Text(world.authorName).fontWeight(.bold).foregroundColor(.blue)
-                        Image(systemName: "chevron.right").font(.caption).foregroundColor(.gray)
+                if let authorId = world.authorId {
+                    NavigationLink(destination: UserView(userId: authorId)) {
+                        HStack {
+                            Text("Author").foregroundColor(.secondary)
+                            Spacer()
+                            Text(world.safeAuthorName).fontWeight(.bold).foregroundColor(.blue)
+                            Image(systemName: "chevron.right").font(.caption).foregroundColor(.gray)
+                        }
+                        .padding()
                     }
-                    .padding()
+                    Divider()
                 }
-                Divider()
                 DetailRow(key: "Visits", value: world.formatNumber(world.visits))
                 Divider()
                 DetailRow(key: "Favorites", value: world.formatNumber(world.favorites))
                 Divider()
-                DetailRow(key: "Updated", value: String(world.updated_at.prefix(10)))
+                DetailRow(key: "Updated", value: String(world.formattedUpdatedDate.prefix(10)))
             }
             .background(Color(uiColor: .secondarySystemGroupedBackground))
             .cornerRadius(10)

@@ -294,7 +294,7 @@ struct WorldHeaderView: View {
     var body: some View {
         HStack(spacing: 12) {
             // ワールド画像
-            if let url = URL(string: world.thumbnailImageUrl) {
+            if let url = URL(string: world.safeThumbnailImageUrl) {
                 AsyncImage(url: url) { image in
                     image
                         .resizable()
@@ -308,7 +308,7 @@ struct WorldHeaderView: View {
             }
             
             VStack(alignment: .leading, spacing: 2) {
-                Text(world.name)
+                Text(world.safeName)
                     .font(.headline)
                     .lineLimit(1)
                     .foregroundColor(.primary)
@@ -319,7 +319,7 @@ struct WorldHeaderView: View {
                     Text("\(friendCount)")
                         .fontWeight(.bold)
                     
-                    Text("• \(world.capacity) max")
+                    Text("• \(world.safeCapacity) max")
                 }
                 .font(.caption)
                 .foregroundColor(.secondary)
