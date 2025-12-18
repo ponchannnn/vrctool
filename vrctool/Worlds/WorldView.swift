@@ -7,17 +7,20 @@
 import SwiftUI
 
 struct World: Codable, Identifiable {
-    let id: String
-    let name: String
-    let authorId: String
-    let authorName: String
-    let capacity: Int
-    let imageUrl: String
-    let thumbnailImageUrl: String
-    let created_at: String
-    let updated_at: String
+    let id: String?
+    let name: String?
+    let authorId: String?
+    let authorName: String?
+    let capacity: Int?
+    let imageUrl: String?
+    let thumbnailImageUrl: String?
+    let created_at: String?
+    let updated_at: String?
+    let instances: [WorldInstanceEntry]?
     
     let occupants: Int?
+    let privateOccupants: Int?
+    let publicOccupants: Int?
     
     let favoriteId: String?
     let favoriteGroup: String?
@@ -41,17 +44,60 @@ struct World: Codable, Identifiable {
     let labsPublicationDate: String?
     let publicationDate: String?
     
-    var displayImage: String {
-            return thumbnailImageUrl.isEmpty ? imageUrl : thumbnailImageUrl
-        }
+    var safeId: String { id ?? UUID().uuidString }
+    var safeName: String { name ?? "Unknown World" }
+    var safeAuthorName: String { authorName ?? "Unknown Author" }
+    var safeDescription: String { description ?? "" }
+    var safeImageUrl: String { imageUrl ?? "" }
+    var safeThumbnailImageUrl: String { thumbnailImageUrl ?? safeImageUrl }
     
+    var displayImage: String {
+        if let thumb = thumbnailImageUrl, !thumb.isEmpty { return thumb }
+        return safeImageUrl
+    }
+    
+    var safeCapacity: Int { capacity ?? 0 }
+    var safeVisits: Int { visits ?? 0 }
+    var safeFavorites: Int { favorites ?? 0 }
+    var safeHeat: Int { heat ?? 0 }
+    var safeOccupants: Int { occupants ?? 0 }
+    
+    var safeTags: [String] { tags ?? [] }
+    var safeInstances: [WorldInstanceEntry] { instances ?? [] }
+    
+    // 日付整形
+    var formattedUpdatedDate: String {
+        formatDate(originalDate: updated_at)
+    }
+    
+    var formattedCreatedDate: String {
+        formatDate(originalDate: created_at)
+    }
+
+    
+    func formatDate (originalDate: String?) -> String {
+        guard let dateStr = originalDate else { return "-" }
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = isoFormatter.date(from: dateStr) {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .medium
+            return formatter.string(from: date)
+        }
+        return String(dateStr.prefix(10))
+    }
+    
+    // タグの整形
     var cleanTags: [String] {
-        guard let tags = tags else { return [] }
-        return tags.map { tag in
-            tag.replacingOccurrences(of: "author_tag_", with: "")
-               .replacingOccurrences(of: "system_", with: "")
-               .replacingOccurrences(of: "_", with: " ")
-               .capitalized
+        return safeTags.compactMap { tag -> String? in
+            if tag.starts(with: "author_tag_") {
+                return tag.replacingOccurrences(of: "author_tag_", with: "").capitalized
+            }
+            if tag.starts(with: "system_") {
+                return tag.replacingOccurrences(of: "system_", with: "").replacingOccurrences(of: "_", with: " ").capitalized
+            }
+            // admin系はnil
+            return nil
         }
     }
     
@@ -63,6 +109,71 @@ struct World: Codable, Identifiable {
             return String(format: "%.1fk", Double(num)/1000)
         }
         return "\(num)"
+    }
+}
+
+struct WorldInstanceEntry: Codable, Identifiable {
+    let id: String // instanceId
+    let userCount: Int
+    
+    init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        self.id = try container.decode(String.self)
+        self.userCount = try container.decode(Int.self)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+        try container.encode(id)
+        try container.encode(userCount)
+    }
+    
+    var region: String {
+        if id.contains("region(jp)") { return "jp" }
+        if id.contains("region(use)") { return "use" }
+        if id.contains("region(usw)") { return "usw" }
+        if id.contains("region(eu)") { return "eu" }
+        return "us"
+    }
+    
+    var regionFlag: String {
+        LanguageHelper.flag(for: region)
+    }
+    
+    // アクセスタイプ (Public, Friends+, etc)
+    var typeInfo: (String, Color) {
+        if id.contains("hidden") { return ("Friends+", .orange) }
+        if id.contains("friends") { return ("Friends", .yellow) }
+        if id.contains("private") { return ("Invite", .red) }
+        if id.contains("canRequestInvite") { return ("Invite+", .red) }
+        if id.contains("groupAccessType") { return ("Group", .purple) }
+        return ("Public", .green)
+    }
+}
+
+struct LanguageHelper {
+    static func name(for code: String) -> String {
+        let locale = Locale.current
+        return locale.localizedString(forLanguageCode: code) ?? code.uppercased()
+    }
+    
+    static func flag(for code: String) -> String {
+        let targetLocale = Locale(identifier: code)
+        let lang = targetLocale.language.languageCode?.identifier ?? code.lowercased()
+        
+        switch lang {
+        case "ja": return "🇯🇵"
+        case "en": return "🇺🇸"
+        case "ko": return "🇰🇷"
+        case "zh": return "🇨🇳"
+        case "de": return "🇩🇪"
+        case "fr": return "🇫🇷"
+        case "es": return "🇪🇸"
+        case "ru": return "🇷🇺"
+        case "uk": return "🇺🇦"
+        case "pt": return "🇧🇷"
+        default: return "🌐"
+        }
     }
 }
 
@@ -100,6 +211,29 @@ struct WorldView: View {
                             
                             descriptionSection(world: world)
                             
+                            if !world.safeInstances.isEmpty {
+                                VStack(alignment: .leading) {
+                                    Text("Active Instances (\(world.safeInstances.count))")
+                                        .font(.headline)
+                                        .padding(.horizontal)
+                                    
+                                    ScrollView(.horizontal, showsIndicators: false) {
+                                        HStack(spacing: 12) {
+                                            ForEach(world.safeInstances) { instanceEntry in
+                                                let fullLocation = "\(world.safeId):\(instanceEntry.id)"
+                                                
+                                                NavigationLink(destination: InstanceView(instanceId: fullLocation)) {
+                                                    WorldInstanceCard(instance: instanceEntry)
+                                                }
+                                                .buttonStyle(PlainButtonStyle())
+                                            }
+                                        }
+                                        .padding(.horizontal)
+                                        .padding(.vertical, 4)
+                                    }
+                                }
+                            }
+                            
                             detailsListSection(world: world)
                             
                             if let tags = world.tags, !tags.isEmpty {
@@ -121,9 +255,6 @@ struct WorldView: View {
             .edgesIgnoringSafeArea(.top)
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
-                // データがない、または詳細情報(description等)が欠けている可能性がある場合は取得
-                // (リストから渡されたWorldは軽量版の可能性があるため、IDがあれば再取得するのが確実ですが、
-                // 今回はWorld構造体が統一されたので、nilの場合のみ取得します)
                 if world == nil && worldId != nil {
                     fetchData()
                 }
@@ -174,7 +305,7 @@ struct WorldView: View {
                     LinearGradient(colors: [.clear, .black.opacity(0.9)], startPoint: .center, endPoint: .bottom)
                     
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(world.name)
+                        Text(world.safeName)
                             .font(.system(size: 28, weight: .bold))
                             .foregroundColor(.white)
                             .lineLimit(2)
@@ -210,7 +341,7 @@ struct WorldView: View {
     
     func actionButtonsSection(world: World) -> some View {
         HStack {
-            let url = URL(string: "https://vrchat.com/home/world/\(world.id)")!
+            let url = URL(string: "https://vrchat.com/home/world/\(world.safeId)")!
             Link(destination: url) {
                 HStack {
                     Image(systemName: "safari")
@@ -244,7 +375,7 @@ struct WorldView: View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
             StatCard(title: "Visits", value: world.formatNumber(world.visits), icon: "figure.walk", color: .purple)
             StatCard(title: "Favorites", value: world.formatNumber(world.favorites), icon: "star.fill", color: .yellow)
-            StatCard(title: "Capacity", value: "\(world.capacity)", icon: "person.3.fill", color: .blue)
+            StatCard(title: "Capacity", value: "\(world.safeCapacity)", icon: "person.3.fill", color: .blue)
             StatCard(title: "Heat", value: "\(world.heat ?? 0)", icon: "flame.fill", color: .orange)
         }
     }
@@ -273,23 +404,25 @@ struct WorldView: View {
     
     func detailsListSection(world: World) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            NavigationLink(destination: UserView(userId: world.authorId)) {
-                HStack {
-                    Text("Author").foregroundColor(.secondary)
-                    Spacer()
-                    Text(world.authorName)
-                        .fontWeight(.bold)
-                        .foregroundColor(.blue)
-                    Image(systemName: "chevron.right").font(.caption).foregroundColor(.gray)
+            if let authorId = world.authorId {
+                NavigationLink(destination: UserView(userId: authorId)) {
+                    HStack {
+                        Text("Author").foregroundColor(.secondary)
+                        Spacer()
+                        Text(world.safeAuthorName)
+                            .fontWeight(.bold)
+                            .foregroundColor(.blue)
+                        Image(systemName: "chevron.right").font(.caption).foregroundColor(.gray)
+                    }
+                    .padding()
                 }
-                .padding()
             }
             
             Divider()
             
-            DetailRow(key: "Updated", value: String(world.updated_at.prefix(10)))
+            DetailRow(key: "Updated", value: String(world.formattedUpdatedDate.prefix(10)))
             Divider()
-            DetailRow(key: "Created", value: String(world.created_at.prefix(10)))
+            DetailRow(key: "Created", value: String(world.formattedCreatedDate.prefix(10)))
             
             if let labsDate = world.labsPublicationDate, labsDate != "none" {
                 Divider()
@@ -352,6 +485,67 @@ struct StatCard: View {
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.03), radius: 2, x: 0, y: 1)
+    }
+}
+
+struct WorldInstanceCard: View {
+    let instance: WorldInstanceEntry
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            
+            HStack {
+                // リージョン国旗
+                Text(instance.regionFlag)
+                    .font(.title2)
+                
+                Spacer()
+                
+                // アクセスタイプ (Public/Friends+など)
+                Text(instance.typeInfo.0)
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(instance.typeInfo.1.opacity(0.2))
+                    .foregroundColor(instance.typeInfo.1)
+                    .cornerRadius(4)
+            }
+            
+            Spacer()
+            
+            HStack(alignment: .bottom) {
+                // 人数
+                HStack(spacing: 2) {
+                    Image(systemName: "person.2.fill")
+                        .font(.caption)
+                    Text("\(instance.userCount)")
+                        .font(.headline)
+                }
+                .foregroundColor(.primary)
+                
+                Spacer()
+                
+                // インスタンスIDの一部
+                Text(parseShortId(instance.id))
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+        }
+        .padding(10)
+        .frame(width: 140, height: 100) // カードサイズ
+        .background(Color(uiColor: .tertiarySystemGroupedBackground))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.secondary.opacity(0.1), lineWidth: 1)
+        )
+    }
+    
+    // 例: "82898~region(jp)" -> "82898"
+    func parseShortId(_ fullId: String) -> String {
+        return fullId.components(separatedBy: "~").first ?? fullId
     }
 }
 

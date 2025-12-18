@@ -55,29 +55,29 @@ struct WorldListView: View {
                 filtered = worlds
             } else {
                 filtered = worlds.filter { world in
-                    world.name.localizedCaseInsensitiveContains(searchText) ||
-                    world.authorName.localizedCaseInsensitiveContains(searchText)
+                    world.safeName.localizedCaseInsensitiveContains(searchText) ||
+                    world.safeAuthorName.localizedCaseInsensitiveContains(searchText)
                 }
             }
             
             return filtered.sorted { w1, w2 in
                 switch sortOption {
                 case .updatedNewest:
-                    return w1.updated_at > w2.updated_at
+                    return w1.updated_at ?? "" > w2.updated_at ?? ""
                 case .updatedOldest:
-                    return w1.updated_at < w2.updated_at
+                    return w1.updated_at ?? "" < w2.updated_at ?? ""
                 case .createdNewest:
-                    return w1.created_at > w2.created_at
+                    return w1.created_at ?? "" > w2.created_at ?? ""
                 case .createdOldest:
-                    return w1.created_at < w2.created_at
+                    return w1.created_at ?? "" < w2.created_at ?? ""
                 case .popularity:
-                    return (w1.visits ?? 0) > (w2.visits ?? 0)
+                    return (w1.safeVisits) > (w2.safeVisits)
                 case .favorites:
-                    return (w1.favorites ?? 0) > (w2.favorites ?? 0)
+                    return (w1.safeFavorites) > (w2.safeFavorites)
                 case .capacity:
-                    return w1.capacity > w2.capacity
+                    return w1.safeCapacity > w2.safeCapacity
                 case .nameAsc:
-                    return w1.name < w2.name
+                    return w1.safeName < w2.safeName
                 }
             }
         }
@@ -101,10 +101,12 @@ struct WorldListView: View {
                 ScrollView {
                     LazyVStack(spacing: 16) {
                         ForEach(displayedWorlds) { world in
-                            NavigationLink(destination: WorldView(worldId: world.id)) {
-                                WorldCardView(world: world)
+                            if let worldId = world.id {
+                                NavigationLink(destination: WorldView(worldId: worldId)) {
+                                    WorldCardView(world: world)
+                                }
+                                .buttonStyle(PlainButtonStyle())
                             }
-                            .buttonStyle(PlainButtonStyle())
                         }
                         
                         if hasMoreData {
@@ -196,12 +198,12 @@ struct WorldCardView: View {
             }
             
             VStack(alignment: .leading, spacing: 6) {
-                Text(world.name)
+                Text(world.safeName)
                     .font(.headline)
                     .lineLimit(1)
                     .foregroundColor(.primary)
                 
-                Text("by \(world.authorName)")
+                Text("by \(world.safeAuthorName)")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
@@ -215,7 +217,7 @@ struct WorldCardView: View {
                     Label(world.formatNumber(world.visits), systemImage: "figure.walk")
                         .foregroundColor(.purple)
                     Spacer()
-                    Label("\(world.capacity)", systemImage: "person.3.fill")
+                    Label("\(world.safeCapacity)", systemImage: "person.3.fill")
                         .foregroundColor(.blue)
                 }
                 .font(.caption)

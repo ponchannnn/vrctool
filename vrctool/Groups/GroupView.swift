@@ -42,9 +42,29 @@ struct VRCGroup: Codable, Identifiable {
     let mutualMemberCount: Int? // 共通のフレンド数（検索時などに付与されることがある）
     let transferTargetId: String? // オーナー権限譲渡中のターゲットID
     
+    // リストAPI (GET /users/:id/groups) 由来
+    let groupId: String?
+    let mutualGroup: Bool?
+    let isRepresenting: Bool?
+    let memberVisibility: String?
+    let lastPostReadAt: String?
+    let hasJoinedFrom: String?
+    let joinedAt: String?
+    
     // MARK: - Safe Accessors (UI用)
     
-    var safeId: String { id ?? "" }
+    var safeId: String {
+        // リストAPI由来なら groupId
+        if let gId = groupId, !gId.isEmpty { return gId }
+        // 詳細API由来なら id が "grp_" で始まっているはず
+        if let rawId = id, rawId.hasPrefix("grp_") { return rawId }
+        return ""
+    }
+    var safeMembershipId: String {
+        // リストAPI由来の場合、id は gmem_...
+        if let rawId = id, rawId.hasPrefix("gmem_") { return rawId }
+        return ""
+    }
     var safeName: String { name ?? "Unknown Group" }
     var safeShortCode: String { shortCode ?? "" }
     var safeDiscriminator: String { discriminator ?? "0000" }
@@ -86,7 +106,7 @@ struct VRCGroup: Codable, Identifiable {
     
     // 自分が参加しているかどうか
     var isJoined: Bool {
-        return membershipStatus == "member" || myMember != nil
+        return membershipStatus == "member" || myMember != nil || groupId != nil
     }
 }
 
@@ -270,6 +290,9 @@ struct GroupView: View {
     @State private var isProcessingJoin = false
     @State private var pendingAction: GroupAction?
     
+    @State private var groupInstances: [Instance] = []
+    @State private var isLoadingInstances = false
+    
     var body: some View {
         ScrollView {
             if let group = group {
@@ -285,8 +308,17 @@ struct GroupView: View {
                             
                             Divider()
                             
+                            if !group.safeLanguages.isEmpty {
+                                languageSection(group: group)
+                                Divider()
+                            }
+                            
                             // 統計 (メンバー数・オンライン数・公開設定)
                             statsSection(group: group)
+                            
+                            if isLoadingInstances || !groupInstances.isEmpty {
+                                activeInstancesSection()
+                            }
                             
                             groupLinksSection(group: group)
                             
@@ -415,11 +447,11 @@ struct GroupView: View {
             
             if action.isDestructive {
                 confirmButton = .destructive(Text("Confirm")) {
-                    Task { await executeAction() }
+                    Task { await executeAction(action) }
                 }
             } else {
                 confirmButton = .default(Text("Confirm")) {
-                    Task { await executeAction() }
+                    Task { await executeAction(action) }
                 }
             }
             
@@ -434,6 +466,9 @@ struct GroupView: View {
             // すでにデータがある場合は再ロードしない制御も可能
             if group == nil {
                 await fetchGroup()
+            }
+            if groupInstances.isEmpty {
+                await fetchInstances()
             }
         }
     }
@@ -506,6 +541,33 @@ struct GroupView: View {
         }
     }
     
+    func languageSection(group: VRCGroup) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Languages", systemImage: "globe")
+                .font(.headline)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack {
+                    ForEach(group.safeLanguages, id: \.self) { code in
+                        HStack(spacing: 6) {
+                            Text(LanguageHelper.flag(for: code))
+                            Text(LanguageHelper.name(for: code))
+                                .fontWeight(.medium)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color(uiColor: .tertiarySystemGroupedBackground))
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                        )
+                    }
+                }
+            }
+        }
+    }
+    
     // 統計情報
     func statsSection(group: VRCGroup) -> some View {
         HStack(spacing: 20) {
@@ -525,6 +587,91 @@ struct GroupView: View {
         .frame(maxWidth: .infinity)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .cornerRadius(12)
+    }
+    
+    func activeInstancesSection() -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Label("Active Instances", systemImage: "figure.socialdance")
+                    .font(.headline)
+                Spacer()
+                if isLoadingInstances {
+                    ProgressView().controlSize(.small)
+                } else {
+                    Text("\(groupInstances.count)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(8)
+                }
+            }
+            
+            if !groupInstances.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(groupInstances) { instance in
+                            NavigationLink(destination: InstanceView(instanceId: instance.safeLocation)) {
+                                instanceCard(instance: instance)
+                            }
+                            .buttonStyle(PlainButtonStyle()) // リンクの色を無効化
+                        }
+                    }
+                    .padding(.vertical, 4) // 影が見えるように少し余白
+                }
+            } else if !isLoadingInstances {
+                Text("No active group instances.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .cornerRadius(12)
+    }
+    
+    func instanceCard(instance: Instance) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ZStack {
+                Rectangle()
+                    .fill(Color.blue.opacity(0.1))
+                    .frame(height: 80)
+                
+                Image(systemName: "globe")
+                    .font(.largeTitle)
+                    .foregroundColor(.blue.opacity(0.5))
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(instance.safeWorldName)
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .lineLimit(1)
+                
+                HStack {
+                    Text("\(LanguageHelper.flag(for: instance.safeRegion))\(LanguageHelper.name(for: instance.safeRegion))")
+                        .font(.caption)
+                    Text("\(instance.safeUserCount) / \(instance.safeCapacity)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    // 参加タイプ (Public/Group/Friendsなど)
+                    Text("Group")
+                        .font(.caption2)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(Color.orange.opacity(0.2))
+                        .foregroundColor(.orange)
+                        .cornerRadius(4)
+                }
+            }
+            .padding(8)
+        }
+        .frame(width: 160)
+        .background(Color(uiColor: .tertiarySystemGroupedBackground))
+        .cornerRadius(10)
+        .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
     }
     
     // Join State用のアイコン定義
@@ -585,6 +732,7 @@ struct GroupView: View {
                         }
                     }
                     .padding()
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(PlainButtonStyle())
                 .disabled(isLoadingMembers)
@@ -611,6 +759,7 @@ struct GroupView: View {
                         }
                     }
                     .padding()
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(PlainButtonStyle())
                 .disabled(isLoadingRoles)
@@ -777,7 +926,7 @@ struct GroupView: View {
             Label("Tags", systemImage: "tag")
                 .font(.headline)
             
-            // 簡易的なFlowLayout (LazyVGridで代用)
+            // FlowLayout (LazyVGridで代用)
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 8) {
                 ForEach(group.safeTags, id: \.self) { tag in
                     Text(tag)
@@ -798,8 +947,26 @@ struct GroupView: View {
                 .font(.headline)
             
             VStack(spacing: 0) {
-                DetailRow(key: "Owner ID", value: group.safeOwnerId) // タップでUserViewへ飛べるようにすると良い
-                Divider()
+                if !group.safeOwnerId.isEmpty {
+                    NavigationLink(destination: UserView(userId: group.safeOwnerId)) {
+                        HStack {
+                            Text("Owner")
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("View Profile")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding()
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    Divider()
+                }
                 DetailRow(key: "Created", value: group.formattedCreatedAt)
             }
             .background(Color(uiColor: .secondarySystemGroupedBackground))
@@ -821,6 +988,7 @@ struct GroupView: View {
                         self.isLoading = false
                         if data.isJoined {
                             Task { await fetchAnnouncements() }
+                            Task { await fetchInstances() }
                         } else {
                             self.isLoadingAnnouncements = false
                         }
@@ -896,10 +1064,27 @@ struct GroupView: View {
         }
     }
     
-    func executeAction() async {
-        guard let action = pendingAction else { return }
+    func fetchInstances() async {
+        isLoadingInstances = true
+        await withCheckedContinuation { continuation in
+            NetworkManager.request(endpoint: "groups/\(groupId)/instances") { (result: Result<[Instance], Error>) in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let data):
+                        self.groupInstances = data
+                    case .failure(let error):
+                        print("Failed to fetch instances: \(error)")
+                        self.groupInstances = []
+                    }
+                    self.isLoadingInstances = false
+                    continuation.resume()
+                }
+            }
+        }
+    }
+    
+    func executeAction(_ action: GroupAction) async {
         isProcessingJoin = true
-        
         switch action {
         case .join:
             await joinGroup()
