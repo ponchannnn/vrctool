@@ -94,7 +94,7 @@ struct GroupPostListView: View {
         
         // 編集シート
         .sheet(item: $postToEdit) { post in
-            NewPostSheet(groupId: groupId, post: post) { title, text, img, _, vis, roles in
+            NewPostSheet(groupId: groupId, editingPost: post) { title, text, img, _, vis, roles in
                 await editPost(id: post.safeId, title: title, text: text, visibility: vis, roleIds: roles)
             }
         }

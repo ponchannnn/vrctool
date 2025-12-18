@@ -513,6 +513,7 @@ extension GroupRole {
 
 struct GroupView: View {
     let groupId: String
+    @State private var postToEdit: GroupPost?
     
     @State private var group: VRCGroup?
     @State private var isLoading = true
@@ -589,6 +590,11 @@ struct GroupView: View {
         .sheet(isPresented: $showPostSheet) {
             NewPostSheet(groupId: groupId) { title, text, img, notify, vis, roles in
                 await createPost(title: title, text: text, imageId: img, sendNotification: notify, visibility: vis, roleIds: roles)
+            }
+        }
+        .sheet(item: $postToEdit) { post in
+            NewPostSheet(groupId: groupId, editingPost: post) { title, text, img, _, vis, roles in
+                await editPost(postId: post.safeId, title: title, text: text, imageId: img, visibility: vis, roleIds: roles)
             }
         }
         
@@ -1225,6 +1231,12 @@ struct GroupView: View {
                     .contextMenu {
                         // 管理者用削除メニュー
                         if group.myMember?.hasPermission(.manageGroupAnnouncement) == true {
+                            Button {
+                                postToEdit = post
+                            } label: {
+                                Label("Edit Post", systemImage: "pencil")
+                            }
+                            
                             Button(role: .destructive) {
                                 deletePost(postId: post.safeId)
                             } label: {
@@ -1438,6 +1450,7 @@ struct GroupView: View {
                         if data.isJoined {
                             Task { await fetchAnnouncements() }
                             Task { await fetchInstances() }
+                            Task { await fetchPosts() }
                         } else {
                             self.isLoadingAnnouncements = false
                         }
@@ -1614,12 +1627,16 @@ struct GroupView: View {
     
     // お知らせ作成
     func createAnnouncement(title: String, text: String, imageId: String?, sendNotification: Bool) async -> Bool {
-        let body: [String: Any] = [
+        var body: [String: Any] = [
             "title": title,
             "text": text,
             "imageId": imageId ?? "",
             "sendNotification": sendNotification
         ]
+        
+        if let img = imageId, !img.isEmpty {
+            body["imageId"] = img
+        }
         
         return await withCheckedContinuation { continuation in
             NetworkManager.action(endpoint: "groups/\(groupId)/announcements", method: "POST", body: body) { (result: Result<String, Error>) in
@@ -1646,7 +1663,7 @@ struct GroupView: View {
                 case .success(let data):
                     self.posts = data.safePosts
                 case .failure(let error):
-                    print(error)
+                    print("Fetch Group Post Error\(error)")
                 }
             }
         }
@@ -1654,7 +1671,7 @@ struct GroupView: View {
     
     // 新規投稿を作成
     func createPost(title: String, text: String, imageId: String?, sendNotification: Bool, visibility: String, roleIds: [String]) async -> Bool {
-        let body: [String: Any] = [
+        var body: [String: Any] = [
             "title": title,
             "text": text,
             "imageId": imageId ?? "",
@@ -1663,8 +1680,12 @@ struct GroupView: View {
             "roleIds": roleIds
         ]
         
+        if let img = imageId, !img.isEmpty {
+            body["imageId"] = img
+        }
+        
         return await withCheckedContinuation { continuation in
-            NetworkManager.action(endpoint: "groups/\(groupId)/posts", method: "POST", body: body) { (result: Result<String, Error>) in
+            NetworkManager.action(endpoint: "groups/\(groupId)/posts", method: "POST", body: body) { (result: Result<GroupPost, Error>) in
                 DispatchQueue.main.async {
                     switch result {
                     case .success:
@@ -1680,13 +1701,17 @@ struct GroupView: View {
     }
     
     func editPost(postId: String, title: String, text: String, imageId: String?, visibility: String, roleIds: [String]) async -> Bool {
-        let body: [String: Any] = [
+        var body: [String: Any] = [
             "title": title,
             "text": text,
             "imageId": imageId ?? "",
             "visibility": visibility,
             "roleIds": roleIds
         ]
+        
+        if let img = imageId, !img.isEmpty {
+            body["imageId"] = img
+        }
         
         return await withCheckedContinuation { continuation in
             NetworkManager.action(endpoint: "groups/\(groupId)/posts/\(postId)", method: "PUT", body: body) { (result: Result<String, Error>) in
@@ -1793,15 +1818,15 @@ struct NewPostSheet: View {
     @State private var isLoadingRoles = true
     @State private var isProcessing = false
     
-    init(groupId: String, post: GroupPost? = nil, onSave: @escaping (String, String, String?, Bool, String, [String]) async -> Bool) {
+    init(groupId: String, editingPost: GroupPost? = nil, onSave: @escaping (String, String, String?, Bool, String, [String]) async -> Bool) {
         self.groupId = groupId
-        self.editingPost = post
+        self.editingPost = editingPost
         self.onSave = onSave
         
-        _title = State(initialValue: post?.safeTitle ?? "")
-        _text = State(initialValue: post?.safeText ?? "")
-        _visibility = State(initialValue: post?.safeVisibility ?? "group")
-        _selectedRoleIds = State(initialValue: Set(post?.safeRoleIds ?? []))
+        _title = State(initialValue: editingPost?.safeTitle ?? "")
+        _text = State(initialValue: editingPost?.safeText ?? "")
+        _visibility = State(initialValue: editingPost?.safeVisibility ?? "group")
+        _selectedRoleIds = State(initialValue: Set(editingPost?.safeRoleIds ?? []))
     }
     
     var isEditing: Bool { editingPost != nil }
@@ -1811,7 +1836,7 @@ struct NewPostSheet: View {
             Form {
                 Section(header: Text("Post Content")) {
                     TextField("Headline", text: $title)
-                    TextField("Story", text: $text, axis: .vertical)
+                    TextField("Content", text: $text, axis: .vertical)
                         .lineLimit(5...10)
                 }
                 
