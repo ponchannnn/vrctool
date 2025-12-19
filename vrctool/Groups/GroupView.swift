@@ -185,6 +185,7 @@ struct GroupAnnouncement: Codable, Identifiable {
     var safeId: String { id ?? UUID().uuidString }
     var safeTitle: String { title ?? "Announcement" }
     var safeText: String { text ?? "" }
+    var safeImageUrl: String { imageUrl ?? "" }
     
     var createdDate: Date? {
         guard let createdAt = createdAt else { return nil }
@@ -203,21 +204,21 @@ struct GroupAnnouncement: Codable, Identifiable {
 }
 
 struct AnyGroupAnnouncements: Codable {
-    let items: [GroupAnnouncement]
+    let item: GroupAnnouncement?
 
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         
-        if let list = try? container.decode([GroupAnnouncement].self) {
-            self.items = list
+        if let announcement = try? container.decode(GroupAnnouncement.self) {
+            self.item = announcement
         } else {
-            self.items = []
+            self.item = nil
         }
     }
     
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        try container.encode(items)
+        try container.encode(item)
     }
 }
 
@@ -533,7 +534,7 @@ struct GroupView: View {
     @State private var showRoles = false
     
     // Announcements State
-    @State private var announcements: [GroupAnnouncement] = []
+    @State private var announcement: GroupAnnouncement? = nil
     @State private var showFullAnonouncement = false
     @State private var isLoadingAnnouncements = false
     
@@ -544,6 +545,7 @@ struct GroupView: View {
     @State private var isLoadingInstances = false
     
     @State private var posts: [GroupPost] = []
+    @State private var expandedPostIds: Set<String> = []
     @State private var isLoadingPosts = false
     
     @State private var showAnnouncementSheet = false
@@ -1117,7 +1119,7 @@ struct GroupView: View {
             if isLoadingAnnouncements {
                 HStack { Spacer(); ProgressView(); Spacer() }
                     .padding()
-            } else if let announcement = announcements.first {
+            } else if let announcement = announcement {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(announcement.safeTitle)
                         .font(.subheadline)
@@ -1127,7 +1129,7 @@ struct GroupView: View {
                         .font(.caption)
                         .lineLimit(showFullAnonouncement ? nil : 5)
                     
-                    if announcement.safeText.count > 150 {
+                    if announcement.safeText.count > 80 || announcement.safeText.filter({ $0 == "\n" }).count >= 4 {
                         Button(action: { withAnimation { showFullAnonouncement.toggle() } }) {
                             Text(showFullAnonouncement ? "Show Less" : "Show More")
                                 .font(.caption)
@@ -1135,6 +1137,16 @@ struct GroupView: View {
                                 .foregroundColor(.blue)
                         }
                         .padding(.top, 4)
+                    }
+                    
+                    if !announcement.safeImageUrl.isEmpty, let url = URL(string: announcement.safeImageUrl) {
+                         AsyncImage(url: url) { img in
+                             img.resizable().scaledToFit()
+                         } placeholder: {
+                             Color.gray.opacity(0.3)
+                         }
+                         .frame(maxHeight: 150)
+                         .cornerRadius(8)
                     }
                     
                     HStack {
@@ -1201,24 +1213,35 @@ struct GroupView: View {
                 ForEach(posts.prefix(3)) { post in
                     VStack(alignment: .leading, spacing: 8) {
                         // タイトルと日付
-                        HStack(alignment: .top) {
-                            Text(post.safeTitle)
-                                .font(.subheadline)
-                                .fontWeight(.bold)
-                                .lineLimit(1)
-                            
-                            Spacer()
-                            
-                            Text(post.formattedDate)
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                        }
+                        Text(post.safeTitle)
+                            .font(.subheadline)
+                            .fontWeight(.bold)
+                            .lineLimit(1)
                         
                         // 本文
+                        let isExpanded = expandedPostIds.contains(post.safeId)
                         Text(post.safeText)
                             .font(.caption)
-                            .lineLimit(3)
+                            .lineLimit(isExpanded ? nil : 3)
                             .foregroundColor(.primary.opacity(0.8))
+                        
+                        if post.safeText.count > 80 || post.safeText.filter({ $0 == "\n" }).count >= 3 {
+                            Button(action: {
+                                withAnimation {
+                                    if isExpanded {
+                                        expandedPostIds.remove(post.safeId)
+                                    } else {
+                                        expandedPostIds.insert(post.safeId)
+                                    }
+                                }
+                            }) {
+                                Text(isExpanded ? "Show Less" : "Show More")
+                                    .font(.caption)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.blue)
+                            }
+                            .padding(.top, 2)
+                        }
                         
                         // 画像があれば表示（URLがある場合）
                         if !post.safeImageUrl.isEmpty, let url = URL(string: post.safeImageUrl) {
@@ -1226,6 +1249,13 @@ struct GroupView: View {
                                 image.resizable().aspectRatio(contentMode: .fill)
                             } placeholder: { Color.gray.opacity(0.2) }
                             .frame(height: 120).cornerRadius(8).clipped()
+                        }
+                        
+                        HStack {
+                            Spacer()
+                            Text(post.formattedDate)
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
                         }
                     }
                     .padding()
@@ -1517,10 +1547,10 @@ struct GroupView: View {
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let data):
-                        self.announcements = data.items
+                        self.announcement = data.item
                     case .failure(let error):
                         print("Failed to fetch announcements: \(error)")
-                        self.announcements = []
+                        self.announcement = nil
                     }
                     self.isLoadingAnnouncements = false
                     continuation.resume()
@@ -1620,7 +1650,7 @@ struct GroupView: View {
             DispatchQueue.main.async {
                 switch result {
                 case .success:
-                    self.announcements.removeAll { $0.id == announcementId }
+                    self.announcement = nil
                 case .failure(let error):
                     print("Failed to delete announcement \(error)")
                 }
