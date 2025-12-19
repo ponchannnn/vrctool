@@ -1633,7 +1633,6 @@ struct GroupView: View {
         var body: [String: Any] = [
             "title": title,
             "text": text,
-            "imageId": imageId ?? "",
             "sendNotification": sendNotification
         ]
         
@@ -1642,13 +1641,14 @@ struct GroupView: View {
         }
         
         return await withCheckedContinuation { continuation in
-            NetworkManager.action(endpoint: "groups/\(groupId)/announcements", method: "POST", body: body) { (result: Result<String, Error>) in
+            NetworkManager.action(endpoint: "groups/\(groupId)/announcement", method: "POST", body: body) { (result: Result<String, Error>) in
                 DispatchQueue.main.async {
                     switch result {
                     case .success:
                         Task { await fetchAnnouncements() }
                         continuation.resume(returning: true)
                     case .failure(let error):
+                        print("Create Announcement Error \(error)")
                         continuation.resume(returning: false)
                     }
                 }
@@ -1677,7 +1677,6 @@ struct GroupView: View {
         var body: [String: Any] = [
             "title": title,
             "text": text,
-            "imageId": imageId ?? "",
             "sendNotification": sendNotification,
             "visibility": visibility,
             "roleIds": roleIds
@@ -1707,7 +1706,6 @@ struct GroupView: View {
         var body: [String: Any] = [
             "title": title,
             "text": text,
-            "imageId": imageId ?? "",
             "visibility": visibility,
             "roleIds": roleIds
         ]
@@ -1767,38 +1765,54 @@ struct NewAnnouncementSheet: View {
                 }
                 
                 Section(footer: Text("Send a notification to all members.")) {
-                    // 画像添付機能をつけるならここに実装 (今回は省略)
-                }
-            }
-            
-            Section(footer: Text("If enabled, all group members who explicitly turned on notifications for this group will receive a push notification.")) {
-                Toggle("Send Notification", isOn: $sendNotification)
-                    .toggleStyle(SwitchToggleStyle(tint: .blue))
-            }
-        }
-        .navigationTitle("New Announcement")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") { dismiss() }
-            }
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Post") {
-                    Task {
-                        isPosting = true
-                        let success = await onPost(title, text, nil, sendNotification)
-                        isPosting = false
-                        if success { dismiss() }
+                    Button {
+                        // 画像選択処理
+                    } label: {
+                        HStack {
+                            Label("Attach Image", systemImage: "photo")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Text("Optional")
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
-                .disabled(title.isEmpty || text.isEmpty || isPosting)
+                
+                Section(footer: Text("If enabled, all group members who explicitly turned on notifications for this group will receive a push notification.")) {
+                    Toggle(isOn: $sendNotification) {
+                        Label("Send Notification", systemImage: "bell.fill")
+                            .foregroundColor(sendNotification ? .primary : .secondary)
+                    }
+                    .toggleStyle(SwitchToggleStyle(tint: .blue))
+                }
             }
-        }
-        .overlay {
-            if isPosting {
-                ZStack {
-                    Color.black.opacity(0.3).ignoresSafeArea()
-                    ProgressView()
+            .navigationTitle("New Announcement")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Post") {
+                        Task {
+                            isPosting = true
+                            let success = await onPost(title, text, nil, sendNotification)
+                            isPosting = false
+                            if success { dismiss() }
+                        }
+                    }
+                    .disabled(title.isEmpty || text.isEmpty || isPosting)
+                    .fontWeight(.bold)
+                }
+            }
+            .disabled(isPosting)
+            .overlay {
+                if isPosting {
+                    ZStack {
+                        Color.black.opacity(0.3).ignoresSafeArea()
+                        ProgressView()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
                 }
             }
         }
