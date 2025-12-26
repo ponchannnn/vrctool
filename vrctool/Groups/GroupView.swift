@@ -8,6 +8,100 @@
 import Foundation
 import SwiftUI
 
+struct VRCLanguage: Identifiable, Hashable {
+    let id: String // 3文字コード (API送信値)
+    let name: String // 表示名
+    let localName: String? // 現地語表記（あれば）
+
+    // 表示用の結合名
+    var displayName: String {
+        return name
+    }
+    
+    // 検索用テキスト
+    var searchableText: String {
+        "\(name) \(localName ?? "") \(id)".lowercased()
+    }
+}
+
+// データセット
+struct VRCLanguages {
+    static let all: [VRCLanguage] = [
+        VRCLanguage(id: "afr", name: "Afrikaans", localName: nil),
+        VRCLanguage(id: "ara", name: "العربية", localName: "Arabic"),
+        VRCLanguage(id: "ase", name: "American Sign Language", localName: "ASL"),
+        VRCLanguage(id: "asf", name: "Auslan (Australian Sign Language)", localName: nil),
+        VRCLanguage(id: "ben", name: "বাংলা", localName: "Bengali"),
+        VRCLanguage(id: "bfi", name: "British Sign Language", localName: "BSL"),
+        VRCLanguage(id: "bul", name: "български", localName: "Bulgarian"),
+        VRCLanguage(id: "ces", name: "Čeština", localName: "Czech"),
+        VRCLanguage(id: "cmn", name: "官话", localName: "Mandarin"),
+        VRCLanguage(id: "cym", name: "Cymraeg", localName: "Welsh"),
+        VRCLanguage(id: "dan", name: "Dansk", localName: "Danish"),
+        VRCLanguage(id: "deu", name: "Deutsch", localName: "German"),
+        VRCLanguage(id: "dse", name: "Nederlandse Gebarentaal", localName: "NGT"),
+        VRCLanguage(id: "ell", name: "Ελληνικά", localName: "Greek"),
+        VRCLanguage(id: "eng", name: "English", localName: nil),
+        VRCLanguage(id: "epo", name: "Esperanto", localName: nil),
+        VRCLanguage(id: "est", name: "eesti", localName: "Estonian"),
+        VRCLanguage(id: "fil", name: "Filipino", localName: nil),
+        VRCLanguage(id: "fin", name: "Suomi", localName: "Finnish"),
+        VRCLanguage(id: "fra", name: "Français", localName: "French"),
+        VRCLanguage(id: "fsl", name: "langue des signes française", localName: "LSF"),
+        VRCLanguage(id: "gla", name: "Gàidhlig", localName: "Scottish Gaelic"),
+        VRCLanguage(id: "gle", name: "Gaeilge", localName: "Irish"),
+        VRCLanguage(id: "gsg", name: "Deutsche Gebärdensprache", localName: "DGS"),
+        VRCLanguage(id: "heb", name: "עברית", localName: "Hebrew"),
+        VRCLanguage(id: "hin", name: "हिन्दी", localName: "Hindi"),
+        VRCLanguage(id: "hmn", name: "Hmoob", localName: "Hmong"),
+        VRCLanguage(id: "hrv", name: "hrvatski", localName: "Croatian"),
+        VRCLanguage(id: "hun", name: "Magyar", localName: "Hungarian"),
+        VRCLanguage(id: "hye", name: "հայերեն", localName: "Armenian"),
+        VRCLanguage(id: "ind", name: "Bahasa Indonesia", localName: "Indonesian"),
+        VRCLanguage(id: "isl", name: "íslenska", localName: "Icelandic"),
+        VRCLanguage(id: "ita", name: "Italiano", localName: "Italian"),
+        VRCLanguage(id: "jpn", name: "日本語", localName: "Japanese"),
+        VRCLanguage(id: "jsl", name: "日本手話", localName: "Japanese Sign Language"),
+        VRCLanguage(id: "kor", name: "한국어", localName: "Korean"),
+        VRCLanguage(id: "kvk", name: "한국 수화 언어", localName: "Korean Sign Language"),
+        VRCLanguage(id: "lav", name: "Latviešu", localName: "Latvian"),
+        VRCLanguage(id: "lit", name: "lietuvių", localName: "Lithuanian"),
+        VRCLanguage(id: "ltz", name: "Lëtzebuergesch", localName: "Luxembourgish"),
+        VRCLanguage(id: "mar", name: "मराठी", localName: "Marathi"),
+        VRCLanguage(id: "mkd", name: "македонски", localName: "Macedonian"),
+        VRCLanguage(id: "mlt", name: "Malti", localName: "Maltese"),
+        VRCLanguage(id: "mri", name: "Māori", localName: nil),
+        VRCLanguage(id: "msa", name: "Bahasa Melayu", localName: "Malay"),
+        VRCLanguage(id: "nld", name: "Nederlands", localName: "Dutch"),
+        VRCLanguage(id: "nor", name: "Norsk", localName: "Norwegian"),
+        VRCLanguage(id: "nzs", name: "New Zealand Sign Language", localName: "NZSL"),
+        VRCLanguage(id: "pol", name: "Polski", localName: "Polish"),
+        VRCLanguage(id: "por", name: "Português", localName: "Portuguese"),
+        VRCLanguage(id: "ron", name: "Română", localName: "Romanian"),
+        VRCLanguage(id: "rus", name: "Русский", localName: "Russian"),
+        VRCLanguage(id: "sco", name: "Scots", localName: nil),
+        VRCLanguage(id: "slk", name: "slovenčina", localName: "Slovak"),
+        VRCLanguage(id: "slv", name: "slovenščina", localName: "Slovenian"),
+        VRCLanguage(id: "spa", name: "Español", localName: "Spanish"),
+        VRCLanguage(id: "swe", name: "Svenska", localName: "Swedish"),
+        VRCLanguage(id: "tel", name: "తెలుగు", localName: "Telugu"),
+        VRCLanguage(id: "tha", name: "ภาษาไทย", localName: "Thai"),
+        VRCLanguage(id: "tok", name: "toki pona", localName: nil),
+        VRCLanguage(id: "tur", name: "Türkçe", localName: "Turkish"),
+        VRCLanguage(id: "ukr", name: "украї́нська", localName: "Ukrainian"),
+        VRCLanguage(id: "vie", name: "Tiếng Việt", localName: "Vietnamese"),
+        VRCLanguage(id: "wuu", name: "吳語", localName: "Wu Chinese"),
+        VRCLanguage(id: "yue", name: "廣東話", localName: "Cantonese"),
+        VRCLanguage(id: "zho", name: "中文", localName: "Chinese"),
+        VRCLanguage(id: "zxx", name: "No linguistic content", localName: nil)
+    ]
+    
+    // コードから名前を引くヘルパー
+    static func name(for code: String) -> String {
+        return all.first(where: { $0.id == code })?.name ?? code.uppercased()
+    }
+}
+
 // MARK: - Group Model
 struct VRCGroup: Codable, Identifiable {
     let id: String?
@@ -1982,31 +2076,136 @@ struct EditGroupSheet: View {
     @Environment(\.dismiss) var dismiss
     
     @State private var name: String
+    @State private var shortCode: String
     @State private var description: String
+    @State private var rules: String
     @State private var joinState: String
+    
+    @State private var languages: [String]
+    @State private var newLanguageInput: String = ""
+    
     @State private var isSaving = false
+    @State private var errorMessage: String?
     
     init(group: VRCGroup) {
         self.group = group
         _name = State(initialValue: group.safeName)
+        _shortCode = State(initialValue: group.safeShortCode)
         _description = State(initialValue: group.safeDescription)
+        _rules = State(initialValue: group.safeRules)
         _joinState = State(initialValue: group.joinState ?? "open")
+        _languages = State(initialValue: group.safeLanguages)
     }
     
     var body: some View {
         NavigationStack {
             Form {
                 Section(header: Text("Basic Info")) {
-                    TextField("Name", text: $name)
-                    TextField("Description", text: $description, axis: .vertical)
-                        .lineLimit(3...6)
+                    // Name (Max 64)
+                    VStack(alignment: .leading, spacing: 4) {
+                        TextField("Group Name", text: $name)
+                            .onChange(of: name) { newValue in
+                                if newValue.count > 64 { name = String(newValue.prefix(64)) }
+                            }
+                        HStack {
+                            Spacer()
+                            Text("\(name.count)/64")
+                                .font(.caption2)
+                                .foregroundColor(name.count > 60 ? .red : .secondary)
+                        }
+                    }
+                    
+                    // Short Code (3-6 chars)
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text("Short Code")
+                            Spacer()
+                            TextField("CODE", text: $shortCode)
+                                .multilineTextAlignment(.trailing)
+                                .textInputAutocapitalization(.characters) // 大文字固定
+                                .onChange(of: shortCode) { newValue in
+                                    // 大文字変換 & 6文字制限 & 英数字のみ
+                                    let filtered = newValue.uppercased().filter { $0.isLetter || $0.isNumber }
+                                    if filtered.count > 6 {
+                                        shortCode = String(filtered.prefix(6))
+                                    } else {
+                                        shortCode = filtered
+                                    }
+                                }
+                        }
+                        HStack {
+                            Spacer()
+                            Text("\(shortCode.count)/6")
+                                .font(.caption2)
+                                .foregroundColor((shortCode.count < 3 || shortCode.count > 6) ? .red : .secondary)
+                        }
+                    }
                 }
                 
-                Section(header: Text("Join State")) {
+                Section(header: Text("Privacy & Access")) {
                     Picker("Join State", selection: $joinState) {
-                        Label("Open", systemImage: "door.left.hand.open").tag("open")
+                        Label("Open (Anyone can join)", systemImage: "door.left.hand.open").tag("open")
+                        Label("Request (Approval required)", systemImage: "person.badge.clock").tag("request")
                         Label("Invite Only", systemImage: "envelope").tag("invite")
-                        Label("Closed", systemImage: "lock").tag("closed")
+                        Label("Closed", systemImage: "lock").tag("closed") // 閉鎖
+                    }
+                }
+                
+                // --- Languages (Max 3, 3-letter) ---
+                Section(header: Text("Languages")) {
+                    NavigationLink {
+                        LanguageSelectionView(selectedLanguages: $languages)
+                    } label: {
+                        HStack {
+                            Text("Select Languages")
+                                .foregroundColor(.primary)
+                            
+                            Spacer()
+                            
+                            // 選択済みの言語を右側に表示 (例: "Japanese, English")
+                            if languages.isEmpty {
+                                Text("None")
+                                    .foregroundColor(.secondary)
+                            } else {
+                                Text(languages.map { VRCLanguages.name(for: $0) }.joined(separator: ", "))
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                                    .truncationMode(.tail)
+                            }
+                        }
+                    }
+                }
+                
+                // --- Description (Max 250) ---
+                Section(header: Text("Description")) {
+                    ZStack(alignment: .bottomTrailing) {
+                        TextEditor(text: $description)
+                            .frame(minHeight: 100)
+                            .onChange(of: description) { newValue in
+                                if newValue.count > 250 { description = String(newValue.prefix(250)) }
+                            }
+                        
+                        Text("\(description.count)/250")
+                            .font(.caption2)
+                            .foregroundColor(description.count > 240 ? .red : .secondary)
+                            .padding(4)
+                            .background(.ultraThinMaterial)
+                            .cornerRadius(4)
+                    }
+                }
+                
+                // --- Rules ---
+                Section(header: Text("Rules")) {
+                    TextEditor(text: $rules)
+                        .frame(minHeight: 100)
+                }
+                
+                // エラー表示
+                if let error = errorMessage {
+                    Section {
+                        Text(error)
+                            .foregroundColor(.red)
+                            .font(.caption)
                     }
                 }
             }
@@ -2020,7 +2219,15 @@ struct EditGroupSheet: View {
                     Button("Save") {
                         saveChanges()
                     }
-                    .disabled(isSaving)
+                    .disabled(isSaving || name.isEmpty || shortCode.count < 3)
+                }
+            }
+            .overlay {
+                if isSaving {
+                    ZStack {
+                        Color.black.opacity(0.3).ignoresSafeArea()
+                        ProgressView()
+                    }
                 }
             }
         }
@@ -2030,8 +2237,11 @@ struct EditGroupSheet: View {
         isSaving = true
         let body: [String: Any] = [
             "name": name,
+            "shortCode": shortCode,
             "description": description,
-            "joinState": joinState
+            "joinState": joinState,
+            "rules": rules,
+            "languages": languages
         ]
         
         NetworkManager.action(endpoint: "groups/\(group.safeId)", method: "PUT", body: body) { (result: Result<String, Error>) in
@@ -2043,6 +2253,82 @@ struct EditGroupSheet: View {
                 case .failure(let error):
                     print("edit group data error \(error)")
                 }
+            }
+        }
+    }
+}
+
+
+struct LanguageSelectionView: View {
+    @Binding var selectedLanguages: [String]
+    @Environment(\.dismiss) var dismiss // 必要なら使うが、通常はBackボタンで戻る
+    
+    @State private var searchText = ""
+    
+    var filteredLanguages: [VRCLanguage] {
+        if searchText.isEmpty {
+            return VRCLanguages.all
+        } else {
+            return VRCLanguages.all.filter {
+                $0.searchableText.contains(searchText.lowercased())
+            }
+        }
+    }
+    
+    var body: some View {
+        List {
+            // 選択中の言語を一番上に表示
+            if !selectedLanguages.isEmpty && searchText.isEmpty {
+                Section(header: Text("Selected (\(selectedLanguages.count)/3)")) {
+                    ForEach(selectedLanguages, id: \.self) { code in
+                        let langName = VRCLanguages.name(for: code)
+                        HStack {
+                            Text(langName).font(.body).fontWeight(.semibold)
+                            Spacer()
+                            Image(systemName: "checkmark.circle.fill").foregroundColor(.blue)
+                        }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            toggleSelection(code)
+                        }
+                    }
+                }
+            }
+            
+            // 全言語リスト
+            Section(header: Text("All Languages")) {
+                ForEach(filteredLanguages) { lang in
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(lang.name).font(.body)
+                            if let local = lang.localName {
+                                Text(local).font(.caption).foregroundColor(.secondary)
+                            }
+                        }
+                        Spacer()
+                        
+                        if selectedLanguages.contains(lang.id) {
+                            Image(systemName: "checkmark").foregroundColor(.blue)
+                        }
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        toggleSelection(lang.id)
+                    }
+                }
+            }
+        }
+        .navigationTitle("Languages")
+        .navigationBarTitleDisplayMode(.inline)
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
+    }
+    
+    func toggleSelection(_ code: String) {
+        if selectedLanguages.contains(code) {
+            selectedLanguages.removeAll { $0 == code }
+        } else {
+            if selectedLanguages.count < 3 {
+                selectedLanguages.append(code)
             }
         }
     }
